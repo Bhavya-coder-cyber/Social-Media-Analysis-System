@@ -1,0 +1,97 @@
+{
+    "platform": "instagram",
+    "username": "piyushgarg.official",
+    "profile_url": "https://www.instagram.com/piyushgarg.official/",
+    "profile": {
+        "platform": "instagram",
+        "username": "piyushgarg.official",
+        "profile_url": "https://www.instagram.com/piyushgarg.official/",
+        "name": "Piyush Garg (@piyushgarg.official) • Instagram photos and videos",
+        "bio": "piyushgarg.official\nPiyush Garg\n97 posts\n41K followers\n76 following\nEducation\nSoftware Engineer | Tech Content Creator & YouTuber | 400k+ on YouTube | 35k+ X (Twitter) | 110k+ LinkedIn\nwww.youtube.com/@piyushgargdev and 4 more\npiyushgarg.official\nFollow\nMessage\nThailand 🇹🇭\nFun ✨\nGoogle IO 26\nBLR ❤️\nVibe Coder 🧡\n🐶🐾\nThapar Uni ✨\nTEDx | HYD✨\nUniversity ❤️\n🧘🏻‍♂️",
+        "followers": 41000,
+        "following": 76,
+        "posts_count": 97,
+        "verified": true
+    },
+    "posts_count": 5,
+    "posts": [
+        {
+            "platform": "instagram",
+            "post_url": "https://www.instagram.com/piyushgarg.official/p/DaxZvFwk_kP/",
+            "post_type": "post",
+            "date": "July 14, 2026",
+            "caption": "Google I/O 2026 ❤️ Grateful ✨",
+            "hashtags": [],
+            "mentions": [],
+            "likes": 3724,
+            "comments": 66,
+            "username": "piyushgarg.official"
+        },
+        {
+            "platform": "instagram",
+            "post_url": "https://www.instagram.com/piyushgarg.official/p/DZwVwA8zxrg/",
+            "post_type": "post",
+            "date": "June 18, 2026",
+            "caption": "🙏🙏",
+            "hashtags": [],
+            "mentions": [],
+            "likes": 5200,
+            "comments": 54,
+            "username": "piyushgarg.official"
+        },
+        {
+            "platform": "instagram",
+            "post_url": "https://www.instagram.com/piyushgarg.official/reel/Db2i5olTCD2/",
+            "post_type": "reel",
+            "date": "August 10, 2026",
+            "caption": "Lets understand Rate Limiting on Backend",
+            "hashtags": [
+                "#coding",
+                "#programming",
+                "#backenddeveloper",
+                "#systemdesigninterviews",
+                "#fullstackdeveloper"
+            ],
+            "mentions": [],
+            "likes": 1101,
+            "comments": 7,
+            "username": "piyushgarg.official"
+        },
+        {
+            "platform": "instagram",
+            "post_url": "https://www.instagram.com/piyushgarg.official/reel/Db8OQ7lzZ7H/",
+            "post_type": "reel",
+            "date": "August 12, 2026",
+            "caption": "Lets understand Backend For Frontends",
+            "hashtags": [
+                "#coding",
+                "#programming",
+                "#backenddeveloper",
+                "#fullstackdeveloper",
+                "#ai"
+            ],
+            "mentions": [],
+            "likes": 2247,
+            "comments": 20,
+            "username": "piyushgarg.official"
+        },
+        {
+            "platform": "instagram",
+            "post_url": "https://www.instagram.com/piyushgarg.official/reel/Db-zZWpTQJD/",
+            "post_type": "reel",
+            "date": "August 13, 2026",
+            "caption": "Lets understand POD in Kubernetes",
+            "hashtags": [
+                "#coding",
+                "#programming",
+                "#backenddeveloper",
+                "#systemdesigninterviews",
+                "#fullstackdeveloper"
+            ],
+            "mentions": [],
+            "likes": 482,
+            "comments": 10,
+            "username": "piyushgarg.official"
+        }
+    ]
+}

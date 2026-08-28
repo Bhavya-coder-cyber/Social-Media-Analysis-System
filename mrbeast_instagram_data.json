@@ -7,42 +7,24 @@
         "username": "mrbeast",
         "profile_url": "https://www.instagram.com/mrbeast/",
         "name": "MrBeast (@mrbeast) • Instagram photos and videos",
-        "bio": "mrbeast\nMrBeast\n502 posts\n88.9M followers\n994 following\nWatch my latest video!! 👇\nm.youtube.com/watch?v=Qtl8lJwbd4g&pp=ugUEEgJlbg%253D%253D&ra=m and 1 more\nOperation Chad\nBasketball 🏀\nSoccer ⚽️\nBeast Games\nCool Peeps\nFeastables\n🇮🇳\nFootball 🏈\nBaseball ⚾️",
+        "bio": "mrbeast\nMrBeast\n503 posts\n89M followers\n994 following\nWatch my latest video!! 👇\nm.youtube.com/watch?v=Qtl8lJwbd4g&pp=ugUEEgJlbg%253D%253D&ra=m and 1 more\nFollow\nMessage\nOperation Chad\nBasketball 🏀\nSoccer ⚽️\nBeast Games\nCool Peeps\nFeastables\n🇮🇳\nFootball 🏈\nBaseball ⚾️",
         "followers": 89000000,
         "following": 1006,
-        "posts_count": 502,
+        "posts_count": 503,
         "verified": true
     },
-    "posts_count": 10,
+    "posts_count": 5,
     "posts": [
         {
             "platform": "instagram",
-            "post_url": "https://www.instagram.com/mrbeast/p/DbD5P56DNo3/",
-            "post_type": "post",
-            "date": "July 21, 2026",
-            "caption": "I found MrsBeast ❤️❤️❤️\n\nand\n\nit\n\nwas\n\nthe\n\nbest\n\nday\n\nof\n\nmy\n\nlife ❤️❤️❤️",
-            "likes": 9000000,
-            "comments": 130000,
-            "username": "mrbeast"
-        },
-        {
-            "platform": "instagram",
-            "post_url": "https://www.instagram.com/mrbeast/reel/Db5rzczsSV5/",
+            "post_url": "https://www.instagram.com/mrbeast/reel/DclO-W8s02-/",
             "post_type": "reel",
-            "date": "August 11, 2026",
-            "caption": "This is why you should never skip school #oldnavypartner",
-            "likes": 591000,
-            "comments": 34000,
-            "username": "mrbeast"
-        },
-        {
-            "platform": "instagram",
-            "post_url": "https://www.instagram.com/mrbeast/p/DcWStNdDARf/",
-            "post_type": "post",
-            "date": "August 22, 2026",
-            "caption": "No filter. Today’s video is a banger.",
-            "likes": 1000000,
-            "comments": 12000,
+            "date": "August 28, 2026",
+            "caption": "When you leave us alone for 5 minutes 😭",
+            "hashtags": [],
+            "mentions": [],
+            "likes": 41000,
+            "comments": 4109,
             "username": "mrbeast"
         },
         {
@@ -51,18 +33,10 @@
             "post_type": "post",
             "date": "June 14, 2026",
             "caption": "Had to update the play button wall ❤️",
+            "hashtags": [],
+            "mentions": [],
             "likes": 6000000,
-            "comments": 122000,
-            "username": "mrbeast"
-        },
-        {
-            "platform": "instagram",
-            "post_url": "https://www.instagram.com/mrbeast/reel/DbjfaJDuDHe/",
-            "post_type": "reel",
-            "date": "August 2, 2026",
-            "caption": "Btw this dance took me hours to learn",
-            "likes": 3000000,
-            "comments": 46000,
+            "comments": 124000,
             "username": "mrbeast"
         },
         {
@@ -71,38 +45,10 @@
             "post_type": "reel",
             "date": "August 13, 2026",
             "caption": "It was my best video ever 😭",
-            "likes": 578000,
-            "comments": 53000,
-            "username": "mrbeast"
-        },
-        {
-            "platform": "instagram",
-            "post_url": "https://www.instagram.com/mrbeast/reel/Dbqgxg3M6B9/",
-            "post_type": "reel",
-            "date": "August 5, 2026",
-            "caption": "The last one was hard 😴",
-            "likes": 718000,
-            "comments": 22000,
-            "username": "mrbeast"
-        },
-        {
-            "platform": "instagram",
-            "post_url": "https://www.instagram.com/mrbeast/reel/DcWgMXvst6y/",
-            "post_type": "reel",
-            "date": "August 22, 2026",
-            "caption": "Me vs 100 cops, what could go wrong 😅",
-            "likes": 317000,
-            "comments": 12000,
-            "username": "mrbeast"
-        },
-        {
-            "platform": "instagram",
-            "post_url": "https://www.instagram.com/mrbeast/reel/Dbn7dk5MnMx/",
-            "post_type": "reel",
-            "date": "August 4, 2026",
-            "caption": "My dance teacher was also legitimately concerned 😭",
-            "likes": 3000000,
-            "comments": 31000,
+            "hashtags": [],
+            "mentions": [],
+            "likes": 608000,
+            "comments": 55000,
             "username": "mrbeast"
         },
         {
@@ -111,8 +57,24 @@
             "post_type": "reel",
             "date": "August 7, 2026",
             "caption": "This was fun :) @lunchly",
-            "likes": 788000,
+            "hashtags": [],
+            "mentions": [
+                "@lunchly"
+            ],
+            "likes": 797000,
             "comments": 16000,
+            "username": "mrbeast"
+        },
+        {
+            "platform": "instagram",
+            "post_url": "https://www.instagram.com/mrbeast/reel/DbjfaJDuDHe/",
+            "post_type": "reel",
+            "date": "August 2, 2026",
+            "caption": "Btw this dance took me hours to learn",
+            "hashtags": [],
+            "mentions": [],
+            "likes": 3000000,
+            "comments": 47000,
             "username": "mrbeast"
         }
     ]

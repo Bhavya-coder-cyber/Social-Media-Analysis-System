@@ -20,8 +20,11 @@ def prepare_browser():
 
     options.add_argument("--start-maximized")
 
-    # Persistent Chrome profile
-    # This keeps your Instagram login session
+    #This needs to change in future based on whether used is logged into instagram or not.
+    options.add_argument("--headless=new")
+
+    # Persistent Chrome profile.
+    # This keeps your Instagram login session.
     profile_path = Path.cwd() / "chrome_profile"
 
     options.add_argument(
@@ -47,9 +50,9 @@ def login_if_required(driver):
 
     print("\nOpening Instagram...")
 
-    time.sleep(2)
+    time.sleep(5)
 
-    # Check existing session
+    # Check if already logged in
     if "accounts/login" not in driver.current_url:
 
         print(
@@ -67,25 +70,23 @@ def login_if_required(driver):
     )
 
     print(
-        "If Instagram sends a verification code,"
+        "Complete any email/phone verification or "
+        "security checks manually."
     )
 
     print(
-        "enter the code manually."
-    )
-
-    print(
-        "\nWaiting up to 3 minutes..."
+        "\nWaiting up to 5 minutes..."
     )
 
     print("=" * 60)
 
-    timeout = 180
+    timeout = 300
+
     start_time = time.time()
 
     while time.time() - start_time < timeout:
 
-        time.sleep(2)
+        time.sleep(3)
 
         current_url = driver.current_url
 
@@ -115,7 +116,55 @@ def login_if_required(driver):
 
 
 # ==========================================================
-# GET PROFILE INFORMATION
+# CONVERT INSTAGRAM NUMBERS
+# ==========================================================
+
+def convert_number(value):
+
+    if value is None:
+
+        return None
+
+    value = (
+        str(value)
+        .strip()
+        .replace(",", "")
+    )
+
+    try:
+
+        # Example: 12K
+        if value.upper().endswith("K"):
+
+            return int(
+                float(value[:-1]) * 1_000
+            )
+
+        # Example: 1.5M
+        elif value.upper().endswith("M"):
+
+            return int(
+                float(value[:-1]) * 1_000_000
+            )
+
+        # Example: 2B
+        elif value.upper().endswith("B"):
+
+            return int(
+                float(value[:-1]) * 1_000_000_000
+            )
+
+        return int(
+            float(value)
+        )
+
+    except ValueError:
+
+        return None
+
+
+# ==========================================================
+# GET PROFILE
 # ==========================================================
 
 def get_profile(driver, username):
@@ -124,6 +173,12 @@ def get_profile(driver, username):
         f"https://www.instagram.com/"
         f"{username}/"
     )
+
+    print(
+        "\nOpening profile:"
+    )
+
+    print(profile_url)
 
     driver.get(profile_url)
 
@@ -136,7 +191,7 @@ def get_profile(driver, username):
         )
     )
 
-    time.sleep(2)
+    time.sleep(4)
 
     profile_data = {
 
@@ -161,7 +216,7 @@ def get_profile(driver, username):
     }
 
     # ------------------------------------------------------
-    # Profile description
+    # Meta description
     # ------------------------------------------------------
 
     try:
@@ -322,13 +377,14 @@ def get_posts(driver, username):
         )
 
         if not url:
+
             continue
 
         # Remove query parameters
         url = url.split("?")[0]
 
         # Only collect posts belonging to
-        # requested username
+        # the requested profile
         username_path = f"/{username}/"
 
         if (
@@ -345,7 +401,7 @@ def get_posts(driver, username):
 
 
 # ==========================================================
-# COLLECT POST URLS WITH SCROLLING
+# COLLECT POST URLS
 # ==========================================================
 
 def collect_post_urls(
@@ -376,10 +432,10 @@ def collect_post_urls(
         )
     )
 
-    time.sleep(2)
+    time.sleep(3)
 
     # ------------------------------------------------------
-    # Check login redirect
+    # Login check
     # ------------------------------------------------------
 
     if "accounts/login" in driver.current_url:
@@ -411,7 +467,6 @@ def collect_post_urls(
             username
         )
 
-        # Keep all URLs collected across scrolling
         all_urls.update(
             current_urls
         )
@@ -438,7 +493,7 @@ def collect_post_urls(
             break
 
         # --------------------------------------------------
-        # Check if new posts loaded
+        # Check whether new posts loaded
         # --------------------------------------------------
 
         if current_count == previous_count:
@@ -450,7 +505,7 @@ def collect_post_urls(
             no_change_count = 0
 
         # --------------------------------------------------
-        # Stop after multiple unsuccessful scrolls
+        # Stop if no new posts
         # --------------------------------------------------
 
         if no_change_count >= 5:
@@ -464,7 +519,7 @@ def collect_post_urls(
         previous_count = current_count
 
         # --------------------------------------------------
-        # Scroll down
+        # Scroll
         # --------------------------------------------------
 
         driver.execute_script(
@@ -473,7 +528,7 @@ def collect_post_urls(
             ");"
         )
 
-        # time.sleep(3)
+        time.sleep(3)
 
     # ------------------------------------------------------
     # Convert set to list
@@ -496,7 +551,7 @@ def collect_post_urls(
 
 
 # ==========================================================
-# META CONTENT
+# GET META CONTENT
 # ==========================================================
 
 def get_meta_content(
@@ -521,12 +576,15 @@ def get_meta_content(
 
 
 # ==========================================================
-# GET CAPTION / DESCRIPTION
+# GET CAPTION
 # ==========================================================
 
 def get_caption(driver):
 
+    # ------------------------------------------------------
     # Try Open Graph description
+    # ------------------------------------------------------
+
     description = get_meta_content(
         driver,
         "og:description"
@@ -536,7 +594,10 @@ def get_caption(driver):
 
         return description
 
+    # ------------------------------------------------------
     # Try normal meta description
+    # ------------------------------------------------------
+
     try:
 
         element = driver.find_element(
@@ -562,61 +623,43 @@ def get_caption(driver):
 
 
 # ==========================================================
-# CONVERT INSTAGRAM NUMBERS
+# EXTRACT HASHTAGS
 # ==========================================================
 
-def convert_number(value):
+def extract_hashtags(text):
 
-    if value is None:
+    if not text:
 
-        return None
+        return []
 
-    value = value.strip().replace(
-        ",",
-        ""
+    hashtags = re.findall(
+        r'#[A-Za-z0-9_]+',
+        text
     )
 
-    try:
-
-        # 12K
-        if value.upper().endswith("K"):
-
-            return int(
-                float(
-                    value[:-1]
-                ) * 1_000
-            )
-
-        # 1.5M
-        elif value.upper().endswith("M"):
-
-            return int(
-                float(
-                    value[:-1]
-                ) * 1_000_000
-            )
-
-        # 2B
-        elif value.upper().endswith("B"):
-
-            return int(
-                float(
-                    value[:-1]
-                ) * 1_000_000_000
-            )
-
-        # Normal number
-        return int(
-            float(value)
-        )
-
-    except ValueError:
-
-        return None
+    return hashtags
 
 
 # ==========================================================
-# PARSE INSTAGRAM DESCRIPTION
+# EXTRACT MENTIONS
+# ==========================================================
+
+def extract_mentions(text):
+
+    if not text:
+
+        return []
+
+    mentions = re.findall(
+        r'@[A-Za-z0-9_.]+',
+        text
+    )
+
+    return mentions
+
+
+# ==========================================================
+# PARSE DESCRIPTION
 # ==========================================================
 
 def parse_instagram_description(
@@ -633,7 +676,11 @@ def parse_instagram_description(
 
         "date": None,
 
-        "caption": None
+        "caption": None,
+
+        "hashtags": [],
+
+        "mentions": []
 
     }
 
@@ -678,7 +725,9 @@ def parse_instagram_description(
     # ------------------------------------------------------
 
     username_match = re.search(
-        r'comments\s*-\s*([A-Za-z0-9_.]+)\s+on\s+',
+        r'comments\s*-\s*'
+        r'([A-Za-z0-9_.]+)'
+        r'\s+on\s+',
         description,
         re.IGNORECASE
     )
@@ -705,9 +754,9 @@ def parse_instagram_description(
             date_match.group(1).strip()
         )
 
-    # ------------------------------------------------------
-    # Caption
-    # ------------------------------------------------------
+    # ======================================================
+    # CAPTION
+    # ======================================================
 
     caption_match = re.search(
         r':\s*"(.*)"\.\s*$',
@@ -717,8 +766,11 @@ def parse_instagram_description(
 
     if caption_match:
 
-        result["caption"] = (
-            caption_match.group(1).strip()
+        # IMPORTANT:
+        # Store caption in a local variable
+        caption = (
+            caption_match.group(1)
+            .strip()
         )
 
     else:
@@ -731,9 +783,67 @@ def parse_instagram_description(
 
         if len(parts) == 2:
 
-            result["caption"] = (
-                parts[1].strip()
+            caption = (
+                parts[1]
+                .strip()
             )
+
+        else:
+
+            caption = (
+                description
+                .strip()
+            )
+
+    # ======================================================
+    # HASHTAGS
+    # ======================================================
+
+    result["hashtags"] = (
+        extract_hashtags(
+            caption
+        )
+    )
+
+    # ======================================================
+    # MENTIONS
+    # ======================================================
+
+    result["mentions"] = (
+        extract_mentions(
+            caption
+        )
+    )
+
+    # ======================================================
+    # REMOVE HASHTAGS FROM CAPTION
+    # ======================================================
+
+    caption = re.sub(
+        r'#[A-Za-z0-9_]+',
+        '',
+        caption
+    )
+
+    # ======================================================
+    # CLEAN CAPTION
+    # ======================================================
+
+    caption = re.sub(
+        r'[ \t]+',
+        ' ',
+        caption
+    )
+
+    caption = re.sub(
+        r'\n\s*\n+',
+        '\n',
+        caption
+    )
+
+    result["caption"] = (
+        caption.strip()
+    )
 
     return result
 
@@ -764,10 +874,10 @@ def scrape_post(
         )
     )
 
-    time.sleep(2)
+    time.sleep(3)
 
     # ------------------------------------------------------
-    # Post type
+    # Determine post type
     # ------------------------------------------------------
 
     if "/reel/" in post_url:
@@ -779,7 +889,7 @@ def scrape_post(
         post_type = "post"
 
     # ------------------------------------------------------
-    # Initial data
+    # Initial structure
     # ------------------------------------------------------
 
     post_data = {
@@ -793,6 +903,10 @@ def scrape_post(
         "date": None,
 
         "caption": None,
+
+        "hashtags": [],
+
+        "mentions": [],
 
         "likes": None,
 
@@ -828,12 +942,24 @@ def scrape_post(
         )
     )
 
+    # ------------------------------------------------------
+    # Basic information
+    # ------------------------------------------------------
+
     post_data["date"] = (
         parsed_data["date"]
     )
 
     post_data["caption"] = (
         parsed_data["caption"]
+    )
+
+    post_data["hashtags"] = (
+        parsed_data["hashtags"]
+    )
+
+    post_data["mentions"] = (
+        parsed_data["mentions"]
     )
 
     post_data["likes"] = (
@@ -919,6 +1045,15 @@ if __name__ == "__main__":
                 target
             )
 
+            if target_posts <= 0:
+
+                print(
+                    "Number of posts must "
+                    "be greater than 0."
+                )
+
+                exit()
+
         except ValueError:
 
             print(
@@ -939,9 +1074,9 @@ if __name__ == "__main__":
 
     try:
 
-        # --------------------------------------------------
-        # Login
-        # --------------------------------------------------
+        # ==================================================
+        # LOGIN
+        # ==================================================
 
         logged_in = login_if_required(
             driver
@@ -956,9 +1091,9 @@ if __name__ == "__main__":
 
             exit()
 
-        # --------------------------------------------------
-        # Get profile
-        # --------------------------------------------------
+        # ==================================================
+        # PROFILE
+        # ==================================================
 
         profile_data = get_profile(
             driver,
@@ -966,7 +1101,7 @@ if __name__ == "__main__":
         )
 
         # --------------------------------------------------
-        # Print profile information
+        # Print profile
         # --------------------------------------------------
 
         print(
@@ -1021,9 +1156,9 @@ if __name__ == "__main__":
             "=" * 60
         )
 
-        # --------------------------------------------------
-        # Collect post URLs
-        # --------------------------------------------------
+        # ==================================================
+        # COLLECT POST URLS
+        # ==================================================
 
         post_urls = collect_post_urls(
             driver,
@@ -1039,27 +1174,9 @@ if __name__ == "__main__":
 
             exit()
 
-        print(
-            "\n"
-            + "=" * 60
-        )
-
-        print(
-            "POST URL COLLECTION COMPLETE"
-        )
-
-        print(
-            "=" * 60
-        )
-
-        print(
-            f"Posts found: "
-            f"{len(post_urls)}"
-        )
-
-        # --------------------------------------------------
-        # Scrape individual posts
-        # --------------------------------------------------
+        # ==================================================
+        # SCRAPE POSTS
+        # ==================================================
 
         all_posts = []
 
@@ -1074,7 +1191,7 @@ if __name__ == "__main__":
             )
 
             print(
-                f"Scraping post "
+                f"SCRAPING POST "
                 f"{index}/{len(post_urls)}"
             )
 
@@ -1089,7 +1206,6 @@ if __name__ == "__main__":
                     post_url
                 )
 
-                # Add username
                 post_data["username"] = (
                     username
                 )
@@ -1097,6 +1213,10 @@ if __name__ == "__main__":
                 all_posts.append(
                     post_data
                 )
+
+                # ------------------------------------------
+                # Print result
+                # ------------------------------------------
 
                 print(
                     "\nCollected:"
@@ -1123,6 +1243,16 @@ if __name__ == "__main__":
                 )
 
                 print(
+                    f"Hashtags:   "
+                    f"{post_data['hashtags']}"
+                )
+
+                print(
+                    f"Mentions:   "
+                    f"{post_data['mentions']}"
+                )
+
+                print(
                     f"Caption:    "
                     f"{post_data['caption']}"
                 )
@@ -1135,67 +1265,67 @@ if __name__ == "__main__":
 
                 print(e)
 
-        # --------------------------------------------------
-        # Final data structure
-        # --------------------------------------------------
-
-        data = {
-
-            "platform": "instagram",
-
-            "username": username,
-
-            "profile_url": (
-                f"https://www.instagram.com/"
-                f"{username}/"
-            ),
-
-            "profile": profile_data,
-
-            "posts_count": len(
-                all_posts
-            ),
-
-            "posts": all_posts
-
-        }
-
-        # --------------------------------------------------
-        # Summary
-        # --------------------------------------------------
-
-        print(
-            "\n"
-            + "=" * 60
-        )
-
-        print(
-            "SCRAPING COMPLETE"
-        )
-
-        print(
-            "=" * 60
-        )
-
-        print(
-            f"Username: "
-            f"{username}"
-        )
-
-        print(
-            f"Posts collected: "
-            f"{len(all_posts)}"
-        )
-
-        # --------------------------------------------------
-        # Save JSON
-        # --------------------------------------------------
-
-        save_json(
-            data,
-            username
-        )
-
     finally:
 
         driver.quit()
+
+    # ======================================================
+    # FINAL DATA
+    # ======================================================
+
+    data = {
+
+        "platform": "instagram",
+
+        "username": username,
+
+        "profile_url": (
+            f"https://www.instagram.com/"
+            f"{username}/"
+        ),
+
+        "profile": profile_data,
+
+        "posts_count": len(
+            all_posts
+        ),
+
+        "posts": all_posts
+
+    }
+
+    # ======================================================
+    # FINAL SUMMARY
+    # ======================================================
+
+    print(
+        "\n"
+        + "=" * 60
+    )
+
+    print(
+        "SCRAPING COMPLETE"
+    )
+
+    print(
+        "=" * 60
+    )
+
+    print(
+        f"Username: "
+        f"{username}"
+    )
+
+    print(
+        f"Posts collected: "
+        f"{len(all_posts)}"
+    )
+
+    # ======================================================
+    # SAVE
+    # ======================================================
+
+    save_json(
+        data,
+        username
+    )
