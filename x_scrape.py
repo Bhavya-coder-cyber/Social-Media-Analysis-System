@@ -46,18 +46,13 @@ def get_author_info(author):
         "followers": author.get("followers"),
         "following": author.get("following"),
 
-        "verified": author.get("isVerified"),
         "blue_verified": author.get("isBlueVerified"),
-
-        "location": author.get("location"),
 
         "profile_url": author.get("twitterUrl"),
 
         "profile_picture": author.get("profilePicture"),
 
         "posts_count": author.get("statusesCount"),
-        "media_count": author.get("mediaCount"),
-        "likes_given": author.get("favouritesCount"),
 
         "account_created_at": author.get("createdAt")
     }
@@ -169,7 +164,7 @@ def scrape_x_profile(username):
 
             "date": item.get("createdAt"),
 
-            "language": item.get("lang"),
+            # "language": item.get("lang"),
 
 
             # -----------------------------------------------
@@ -226,13 +221,6 @@ def scrape_x_profile(username):
 
                 "media_urls": media
             },
-
-
-            # -----------------------------------------------
-            # AUTHOR OF THIS POST
-            # -----------------------------------------------
-
-            "author": get_author_info(author)
         }
 
 
