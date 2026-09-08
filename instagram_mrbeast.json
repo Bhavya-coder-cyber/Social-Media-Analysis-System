@@ -1,0 +1,157 @@
+{
+  "platform": "instagram",
+  "username": "mrbeast",
+  "profile_url": "https://www.instagram.com/mrbeast",
+  "profile": {
+    "username": "mrbeast",
+    "name": "MrBeast",
+    "biography": "Watch my latest video!! 👇",
+    "followers": 89304122,
+    "following": 1000,
+    "posts_count": 507,
+    "verified": true,
+    "is_business_account": false,
+    "private": false,
+    "profile_url": "https://www.instagram.com/mrbeast"
+  },
+  "posts_count": 10,
+  "posts": [
+    {
+      "post_url": "https://www.instagram.com/p/DC7Y9vyyg_b/",
+      "caption": "We are both dropping big videos together November 30th 👀",
+      "hashtags": [],
+      "mentions": [],
+      "date": "2024-11-28T20:10:49.000Z",
+      "media_type": "Sidecar",
+      "product_type": "carousel_container",
+      "likes": 20133375,
+      "comments": 231285,
+      "views": null,
+      "is_pinned": true
+    },
+    {
+      "post_url": "https://www.instagram.com/p/DZkn1f0Flsc/",
+      "caption": "Had to update the play button wall ❤️",
+      "hashtags": [],
+      "mentions": [],
+      "date": "2026-06-14T16:00:06.000Z",
+      "media_type": "Sidecar",
+      "product_type": "carousel_container",
+      "likes": 6104949,
+      "comments": 129351,
+      "views": null,
+      "is_pinned": true
+    },
+    {
+      "post_url": "https://www.instagram.com/p/DcwFcbHli5A/",
+      "caption": "Growing up I thought books were boring, in reality I just didn’t read anything that actually interested me. Which is why I teamed up with James Patterson to write The Most Dangerous Games! For many people this might be the first book they actually read (and hopefully enjoy haha) give it a read and tell me what you think :D \n\nI’m also giving away $1,000,000 to one person to celebrate the launch of the new book, The Most Dangerous Games! Grab a copy wherever books are sold :)\n\nT&Cs: Legal residents of AU, MX, US (excl. MD), or UK, 18+. Void where prohibited. Must have proof of purchase of an English Print Edition to participate. More details at themostdangerousgames.com",
+      "hashtags": [],
+      "mentions": [],
+      "date": "2026-09-01T16:24:51.000Z",
+      "media_type": "Sidecar",
+      "product_type": "carousel_container",
+      "likes": 388460,
+      "comments": 16965,
+      "views": null,
+      "is_pinned": null
+    },
+    {
+      "post_url": "https://www.instagram.com/p/Dc6iwC6OPVm/",
+      "caption": "All in a days work \n\n@googlegemini #googlepartner",
+      "hashtags": [
+        "googlepartner"
+      ],
+      "mentions": [
+        "googlegemini"
+      ],
+      "date": "2026-09-05T17:54:36.000Z",
+      "media_type": "Video",
+      "product_type": "clips",
+      "likes": 159707,
+      "comments": 21438,
+      "views": 1222670,
+      "is_pinned": null
+    },
+    {
+      "post_url": "https://www.instagram.com/p/Dctg42nMtW7/",
+      "caption": "We really cooked this up 🔥🔥🔥",
+      "hashtags": [],
+      "mentions": [],
+      "date": "2026-08-31T16:29:10.000Z",
+      "media_type": "Video",
+      "product_type": "clips",
+      "likes": 387233,
+      "comments": 22572,
+      "views": 3393312,
+      "is_pinned": null
+    },
+    {
+      "post_url": "https://www.instagram.com/p/DcWgMXvst6y/",
+      "caption": "Me vs 100 cops, what could go wrong 😅",
+      "hashtags": [],
+      "mentions": [],
+      "date": "2026-08-22T18:00:47.000Z",
+      "media_type": "Video",
+      "product_type": "clips",
+      "likes": 406841,
+      "comments": 31339,
+      "views": 4121829,
+      "is_pinned": null
+    },
+    {
+      "post_url": "https://www.instagram.com/p/DbD5P56DNo3/",
+      "caption": "I found MrsBeast ❤️❤️❤️\n\nand\n\nit\n\nwas\n\nthe\n\nbest\n\nday\n\nof\n\nmy\n\nlife ❤️❤️❤️",
+      "hashtags": [],
+      "mentions": [],
+      "date": "2026-07-21T16:00:18.000Z",
+      "media_type": "Sidecar",
+      "product_type": "carousel_container",
+      "likes": 9357766,
+      "comments": 147677,
+      "views": null,
+      "is_pinned": true
+    },
+    {
+      "post_url": "https://www.instagram.com/p/DcWStNdDARf/",
+      "caption": "No filter. Today’s video is a banger.",
+      "hashtags": [],
+      "mentions": [],
+      "date": "2026-08-22T16:00:06.000Z",
+      "media_type": "Sidecar",
+      "product_type": "carousel_container",
+      "likes": 1624225,
+      "comments": 17490,
+      "views": null,
+      "is_pinned": null
+    },
+    {
+      "post_url": "https://www.instagram.com/p/DcynDbrDNHR/",
+      "caption": "Appreciate the game @lilbaby",
+      "hashtags": [],
+      "mentions": [
+        "lilbaby"
+      ],
+      "date": "2026-09-02T15:57:01.000Z",
+      "media_type": "Sidecar",
+      "product_type": "carousel_container",
+      "likes": 1959626,
+      "comments": 23392,
+      "views": null,
+      "is_pinned": null
+    },
+    {
+      "post_url": "https://www.instagram.com/p/DcqxZGnsJ4z/",
+      "caption": "Should hood MrBeast drop an album? 👀🔥",
+      "hashtags": [],
+      "mentions": [],
+      "date": "2026-08-30T15:00:08.000Z",
+      "media_type": "Video",
+      "product_type": "clips",
+      "likes": 1784239,
+      "comments": 43598,
+      "views": 10295964,
+      "is_pinned": null
+    }
+  ],
+  "scraped_at": "2026-09-08T07:17:23.990389"
+}

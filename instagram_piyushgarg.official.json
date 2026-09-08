@@ -1,0 +1,203 @@
+{
+  "platform": "instagram",
+  "username": "piyushgarg.official",
+  "profile_url": "https://www.instagram.com/piyushgarg.official",
+  "profile": {
+    "username": "piyushgarg.official",
+    "name": "Piyush Garg",
+    "biography": "Software Engineer | Tech Content Creator & YouTuber | 400k+ on YouTube | 35k+ X (Twitter) | 110k+ LinkedIn",
+    "followers": 41231,
+    "following": 76,
+    "posts_count": 97,
+    "verified": true,
+    "is_business_account": false,
+    "private": false,
+    "profile_url": "https://www.instagram.com/piyushgarg.official"
+  },
+  "posts_count": 10,
+  "posts": [
+    {
+      "post_url": "https://www.instagram.com/p/DZwVwA8zxrg/",
+      "caption": "🙏🙏",
+      "hashtags": [],
+      "mentions": [],
+      "date": "2026-06-19T05:13:39.000Z",
+      "media_type": "Image",
+      "product_type": "feed",
+      "likes": 5198,
+      "comments": 54,
+      "views": null,
+      "video_view_count": null,
+      "video_play_count": null,
+      "is_pinned": true
+    },
+    {
+      "post_url": "https://www.instagram.com/p/DawgmOSiO1Z/",
+      "caption": "",
+      "hashtags": [],
+      "mentions": [],
+      "date": "2026-07-14T03:19:20.000Z",
+      "media_type": "Sidecar",
+      "product_type": "carousel_container",
+      "likes": 7441,
+      "comments": 31,
+      "views": null,
+      "video_view_count": null,
+      "video_play_count": null,
+      "is_pinned": null
+    },
+    {
+      "post_url": "https://www.instagram.com/p/Dawezo_TRW5/",
+      "caption": "Google IO Connect Bengaluru #googleio",
+      "hashtags": [
+        "googleio"
+      ],
+      "mentions": [],
+      "date": "2026-07-14T03:04:37.000Z",
+      "media_type": "Image",
+      "product_type": "feed",
+      "likes": 2485,
+      "comments": 17,
+      "views": null,
+      "video_view_count": null,
+      "video_play_count": null,
+      "is_pinned": null
+    },
+    {
+      "post_url": "https://www.instagram.com/p/Db2i5olTCD2/",
+      "caption": "Lets understand Rate Limiting on Backend #coding #programming #backenddeveloper #systemdesigninterviews #fullstackdeveloper",
+      "hashtags": [
+        "coding",
+        "programming",
+        "backenddeveloper",
+        "systemdesigninterviews",
+        "fullstackdeveloper"
+      ],
+      "mentions": [],
+      "date": "2026-08-10T08:07:23.000Z",
+      "media_type": "Video",
+      "product_type": "clips",
+      "likes": 1113,
+      "comments": 7,
+      "views": 7315,
+      "video_view_count": 7315,
+      "video_play_count": 26462,
+      "is_pinned": null
+    },
+    {
+      "post_url": "https://www.instagram.com/p/Db8OQ7lzZ7H/",
+      "caption": "Lets understand Backend For Frontends #coding #programming #backenddeveloper #fullstackdeveloper #ai",
+      "hashtags": [
+        "coding",
+        "programming",
+        "backenddeveloper",
+        "fullstackdeveloper",
+        "ai"
+      ],
+      "mentions": [],
+      "date": "2026-08-12T13:03:45.000Z",
+      "media_type": "Video",
+      "product_type": "clips",
+      "likes": 2305,
+      "comments": 20,
+      "views": 28469,
+      "video_view_count": 28469,
+      "video_play_count": 72507,
+      "is_pinned": null
+    },
+    {
+      "post_url": "https://www.instagram.com/p/Db-zZWpTQJD/",
+      "caption": "Lets understand POD in Kubernetes #coding #programming #backenddeveloper #systemdesigninterviews #fullstackdeveloper",
+      "hashtags": [
+        "coding",
+        "programming",
+        "backenddeveloper",
+        "systemdesigninterviews",
+        "fullstackdeveloper"
+      ],
+      "mentions": [],
+      "date": "2026-08-13T13:05:08.000Z",
+      "media_type": "Video",
+      "product_type": "clips",
+      "likes": 499,
+      "comments": 11,
+      "views": 3976,
+      "video_view_count": 3976,
+      "video_play_count": 16233,
+      "is_pinned": null
+    },
+    {
+      "post_url": "https://www.instagram.com/p/Db59iw4zpRg/",
+      "caption": "Rate Limiting Algorithm #coding #programming #backenddeveloper #systemdesigninterviews #fullstackdeveloper",
+      "hashtags": [
+        "coding",
+        "programming",
+        "backenddeveloper",
+        "systemdesigninterviews",
+        "fullstackdeveloper"
+      ],
+      "mentions": [],
+      "date": "2026-08-11T15:58:49.000Z",
+      "media_type": "Video",
+      "product_type": "clips",
+      "likes": 514,
+      "comments": 8,
+      "views": 3883,
+      "video_view_count": 3883,
+      "video_play_count": 16141,
+      "is_pinned": null
+    },
+    {
+      "post_url": "https://www.instagram.com/p/Daw91WJxmOh/",
+      "caption": "Best Google Tools according to AI Experts you must know.\n\n.\n.\n.\n.\n#googleio #gemini #ai_with_poonam #google #aitools",
+      "hashtags": [
+        "googleio",
+        "gemini",
+        "ai_with_poonam",
+        "google",
+        "aitools"
+      ],
+      "mentions": [],
+      "date": "2026-07-14T07:38:58.000Z",
+      "media_type": "Video",
+      "product_type": "clips",
+      "likes": 18055,
+      "comments": 170,
+      "views": 141626,
+      "video_view_count": 141626,
+      "video_play_count": 833449,
+      "is_pinned": true
+    },
+    {
+      "post_url": "https://www.instagram.com/p/DaxZvFwk_kP/",
+      "caption": "Google I/O 2026 ❤️ Grateful ✨",
+      "hashtags": [],
+      "mentions": [],
+      "date": "2026-07-14T11:38:37.000Z",
+      "media_type": "Sidecar",
+      "product_type": "carousel_container",
+      "likes": 3725,
+      "comments": 66,
+      "views": null,
+      "video_view_count": null,
+      "video_play_count": null,
+      "is_pinned": null
+    },
+    {
+      "post_url": "https://www.instagram.com/p/DbXjdmsiQnu/",
+      "caption": "विद्या ददाति विनयं। \n𝘛𝘳𝘶𝘦 𝘬𝘯𝘰𝘸𝘭𝘦𝘥𝘨𝘦 𝘨𝘪𝘷𝘦𝘴 𝘳𝘪𝘴𝘦 𝘵𝘰 𝘩𝘶𝘮𝘪𝘭𝘪𝘵𝘺.\n\nTo the mentors who make learning meaningful and growth possible.\n\n𝗛𝗮𝗽𝗽𝘆 𝗚𝘂𝗿𝘂 𝗣𝘂𝗿𝗻𝗶𝗺𝗮 🌸",
+      "hashtags": [],
+      "mentions": [],
+      "date": "2026-07-29T07:18:51.000Z",
+      "media_type": "Video",
+      "product_type": "clips",
+      "likes": 705,
+      "comments": 16,
+      "views": 5714,
+      "video_view_count": 5714,
+      "video_play_count": 24064,
+      "is_pinned": true
+    }
+  ],
+  "scraped_at": "2026-09-08T07:43:54.964328"
+}
