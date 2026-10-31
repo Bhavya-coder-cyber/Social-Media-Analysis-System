@@ -1,6 +1,6 @@
 import re
 from datetime import datetime, timezone
-
+from urllib.parse import urlparse
 try:
     from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
     _vader = SentimentIntensityAnalyzer()
@@ -105,11 +105,14 @@ def _rows(source):
         return [source]
     return []
 
+def extract_instagram_username(url):
+    path = urlparse(url).path.strip("/")
+    return path.split("/")[0].lower()
 
 def _profile_from_row(row):
     if not isinstance(row, dict):
         return {}
-    for key in ("profile", "profileData", "account", "user", "author", "owner"):
+    for key in ("profile", "profileData", "account", "user", "author", "owner", "metaData"):
         val = row.get(key)
         if isinstance(val, dict):
             return val
@@ -130,7 +133,7 @@ def _followers_from(*dicts):
         if not isinstance(d, dict):
             continue
         value = max(value, num(first(d, *FOLLOWER_KEYS, default=0)))
-        for container in _METRIC_CONTAINERS + ("author", "owner", "profile", "user", "account"):
+        for container in _METRIC_CONTAINERS + ("author", "owner", "profile", "user", "account", "metaData"):
             sub = d.get(container)
             if isinstance(sub, dict):
                 value = max(value, num(first(sub, *FOLLOWER_KEYS, default=0)))
@@ -246,6 +249,12 @@ def base(platform, username, name, followers, raw, i, text, likes, comments, sha
 
 
 def _date(p):
+    posted_at = p.get("postedAt")
+    if isinstance(posted_at, dict):
+        nested_date = posted_at.get("date")
+        if nested_date:
+            return nested_date
+    
     return first(p, "date", "timestamp", "takenAtIso", "takenAt", "postedAtISO", "postedAt", "published_at", "publishedAt", "createdAt", "created_at", "posted_date", default="")
 
 
@@ -355,22 +364,49 @@ def normalize(platform, source, requested_ref=""):
         if str(r.get("section", "")).lower() in {"accounting", "summary", "error"}:
             continue
         cand = _profile_from_row(r)
-        if any(k in cand for k in ("followersCount", "followerCount", "followers", "fullName", "profileUrl", "profile_url")):
+        if any(k in cand for k in ("followersCount", "followerCount", "followers", "fullName", "profileUrl", "profile_url", "metaData", "userName", "name")):
             profile = cand
             break
 
     fallback_username = requested_ref.strip().lstrip("@").rstrip("/").split("/")[-1]
-    username, name, followers = _identity(profile or {}, fallback_username, fallback_username)
+    if platform.strip().lower() == "instagram":
+        username = extract_instagram_username(requested_ref)
+        name = username
+        followers = _followers_from(profile or {})
+    elif platform.strip().lower() in {"x", "twitter"}:
+        username = profile.get("userName") or fallback_username
+        name = profile.get("name") or username
+        followers = _followers_from(profile or {})
+    else:
+        username, name, followers = _identity(
+            profile or {}, fallback_username, fallback_username
+        )
 
     for i, p in enumerate(rows):
         if not isinstance(p, dict):
             continue
+        if platform.strip().lower() in {"x", "twitter"}:
+            author = p.get("author") or {}
+            author_username = str(author.get("userName") or "").strip().lower()
+            if author_username != username.strip().lower():
+                continue
         section = str(p.get("section", "")).lower()
         status = str(p.get("status", "")).lower()
+
         if section in {"accounting", "summary", "error"} or status in {"error", "failed", "not_found", "unavailable"}:
             continue
 
-        u, n, pf = _identity(p, username, name)
+        if platform.strip().lower() == "instagram":
+            u = username
+            n = name
+            pf = 0
+        elif platform.strip().lower() in {"x", "twitter"}:
+            u = username
+            n = name
+            pf = _followers_from(p.get("author") or {})
+        else:
+            u, n, pf = _identity(p, username, name)
+
         followers_here = max(followers, pf)
         txt = _text(p)
         likes, comments, shares, views, nested = _post_metrics(p)
