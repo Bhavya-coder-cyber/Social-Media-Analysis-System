@@ -92,7 +92,7 @@ async function api(url, opts = {}) {
 
     try {
         d = await r.json();
-    } catch {}
+    } catch { }
 
     if (!r.ok) {
         throw new Error(
@@ -532,11 +532,11 @@ function renderCreators() {
 
                         <td>
                             ${Object.keys(c.platforms)
-                                .map(
-                                    x =>
-                                        `<span class="pill">${x}</span>`
-                                )
-                                .join(' ')}
+                        .map(
+                            x =>
+                                `<span class="pill">${x}</span>`
+                        )
+                        .join(' ')}
                         </td>
 
                         <td>${fmt(c.followers)}</td>
@@ -544,15 +544,14 @@ function renderCreators() {
                         <td>${fmt(c.interactions)}</td>
 
                         <td>
-                            ${
-                                c.views
-                                    ? (
-                                        c.interactions /
-                                        c.views *
-                                        100
-                                    ).toFixed(2) + '%'
-                                    : '—'
-                            }
+                            ${c.views
+                        ? (
+                            c.interactions /
+                            c.views *
+                            100
+                        ).toFixed(2) + '%'
+                        : '—'
+                    }
                         </td>
                     </tr>
                 `
@@ -730,8 +729,8 @@ async function exportCsv() {
 
     const records =
         d &&
-        d.records &&
-        d.records.length
+            d.records &&
+            d.records.length
             ? d.records
             : state.workspace.flatMap(
                 w => w.records || []
@@ -889,7 +888,7 @@ async function analyze() {
                 'warn',
                 'Connector returned no records',
                 data.warning ||
-                    'Check the Actor input and output schema in Apify Console.'
+                'Check the Actor input and output schema in Apify Console.'
             );
         }
     } catch (e) {
@@ -1075,16 +1074,43 @@ function renderLatest() {
         )
         .join('');
 
+
+    const sortBy = $('#contentSortFilter').value
     // Sort posts by engagement rate.
     const rows = [...d.records]
         .filter(
             r => !r.is_profile_snapshot
         )
-        .sort(
-            (a, b) =>
-                (b.engagement_rate || 0) -
-                (a.engagement_rate || 0)
-        )
+        .sort((a, b) => {
+
+            // Default: Highest engagement first.
+            if (sortBy === 'engagement') {
+                return (
+                    (Number(b.engagement_rate) || 0) -
+                    (Number(a.engagement_rate) || 0)
+                );
+            }
+
+            // Convert post dates into timestamps.
+            const dateA = Date.parse(a.date);
+            const dateB = Date.parse(b.date);
+
+            // Keep posts with invalid dates at the bottom.
+            if (isNaN(dateA)) return 1;
+            if (isNaN(dateB)) return -1;
+
+            // Newest first.
+            if (sortBy === 'latest') {
+                return dateB - dateA;
+            }
+
+            // Oldest first.
+            if (sortBy === 'oldest') {
+                return dateA - dateB;
+            }
+
+            return 0;
+        })
         .slice(0, 15);
 
     $('#postRows').innerHTML =
@@ -1093,17 +1119,15 @@ function renderLatest() {
                 r => `
                     <tr>
                         <td>
-                            ${
-                                String(
-                                    r.date || ''
-                                ).slice(0, 10) || '—'
-                            }
+                            ${String(
+                    r.date || ''
+                ).slice(0, 10) || '—'
+                    }
                         </td>
 
                         <td>
-                            ${
-                                r.url
-                                    ? `
+                            ${r.url
+                        ? `
                                         <a
                                             href="${esc(r.url)}"
                                             target="_blank"
@@ -1114,36 +1138,36 @@ function renderLatest() {
                                             "
                                         >
                                             ${esc(
-                                                (
-                                                    r.text ||
-                                                    '(untitled)'
-                                                )
-                                                    .replace(
-                                                        /\s+/g,
-                                                        ' '
-                                                    )
-                                                    .slice(
-                                                        0,
-                                                        100
-                                                    )
-                                            )}
+                            (
+                                r.text ||
+                                '(untitled)'
+                            )
+                                .replace(
+                                    /\s+/g,
+                                    ' '
+                                )
+                                .slice(
+                                    0,
+                                    100
+                                )
+                        )}
                                         </a>
                                     `
-                                    : esc(
-                                        (
-                                            r.text ||
-                                            '(untitled)'
-                                        )
-                                            .replace(
-                                                /\s+/g,
-                                                ' '
-                                            )
-                                            .slice(
-                                                0,
-                                                100
-                                            )
-                                    )
-                            }
+                        : esc(
+                            (
+                                r.text ||
+                                '(untitled)'
+                            )
+                                .replace(
+                                    /\s+/g,
+                                    ' '
+                                )
+                                .slice(
+                                    0,
+                                    100
+                                )
+                        )
+                    }
                         </td>
 
                         <td>
@@ -1246,21 +1270,20 @@ function renderExplorer() {
 
                         <td>
                             ${esc(
-                                (r.text || '')
-                                    .replace(
-                                        /\s+/g,
-                                        ' '
-                                    )
-                                    .slice(0, 120)
-                            )}
+                    (r.text || '')
+                        .replace(
+                            /\s+/g,
+                            ' '
+                        )
+                        .slice(0, 120)
+                )}
                         </td>
 
                         <td>
-                            ${
-                                String(
-                                    r.date || ''
-                                ).slice(0, 10) || '—'
-                            }
+                            ${String(
+                    r.date || ''
+                ).slice(0, 10) || '—'
+                    }
                         </td>
 
                         <td>
@@ -1344,15 +1367,15 @@ async function loadSaved() {
                         <div>
                             <strong>
                                 ${esc(
-                                    x.source_ref ||
-                                    'Cross-platform workspace'
-                                )}
+                    x.source_ref ||
+                    'Cross-platform workspace'
+                )}
                             </strong>
 
                             <small>
                                 ${new Date(
-                                    x.created_at
-                                ).toLocaleString()}
+                    x.created_at
+                ).toLocaleString()}
                                 · ${x.posts} posts
                                 · ${x.platforms.join(', ')}
                             </small>
@@ -1411,7 +1434,7 @@ async function loadSaved() {
 
                 await api(
                     '/api/saved/' +
-                        b.dataset.id,
+                    b.dataset.id,
                     {
                         method: 'DELETE'
                     }
@@ -1536,17 +1559,15 @@ async function renderHealth() {
                     </div>
 
                     <span
-                        class="pill ${
-                            x[2]
-                                ? 'positive'
-                                : 'negative'
-                        }"
+                        class="pill ${x[2]
+                    ? 'positive'
+                    : 'negative'
+                }"
                     >
-                        ${
-                            x[2]
-                                ? 'READY'
-                                : 'NOT CONFIGURED'
-                        }
+                        ${x[2]
+                    ? 'READY'
+                    : 'NOT CONFIGURED'
+                }
                     </span>
                 </div>
             `
@@ -1584,7 +1605,10 @@ $$('.nav').forEach(
 // Cross analytics metric selector.
 $('#crossMetric').onchange =
     renderBars;
-
+// Top content sorting filter.
+$('#contentSortFilter').onchange = () => {
+    renderLatest();
+};
 // Analyze button.
 $('#analyzeBtn').onclick =
     analyze;
@@ -1634,7 +1658,7 @@ $('#commentsPerVideo').onchange =
 $('#exportCsvBtn') &&
     (
         $('#exportCsvBtn').onclick =
-            exportCsv
+        exportCsv
     );
 
 // Save complete workspace.
@@ -1721,7 +1745,7 @@ $('#reloadSaved').onclick =
             )
                 ? 'Live connectors configured'
                 : 'Connector setup needed';
-    } catch {}
+    } catch { }
 })();
 
 
@@ -1782,19 +1806,18 @@ function renderInsights(ins) {
                                 <div
                                     class="fill"
                                     style="
-                                        width:${
-                                            x.avg_interactions /
-                                            max *
-                                            100
-                                        }%
+                                        width:${x.avg_interactions /
+                        max *
+                        100
+                        }%
                                     "
                                 ></div>
                             </div>
 
                             <span class="barval">
                                 ${metricFmt(
-                                    x.avg_interactions
-                                )}
+                            x.avg_interactions
+                        )}
                             </span>
                         </div>
                     `;
@@ -1827,7 +1850,7 @@ function renderInsights(ins) {
                     Top hours (UTC)
                 </div>
             ` +
-              hrs
+            hrs
                 .slice(0, 5)
                 .map(x => {
                     const max =
@@ -1843,27 +1866,26 @@ function renderInsights(ins) {
                         <div class="barrow">
                             <span class="bar-label">
                                 ${String(
-                                    x.hour
-                                ).padStart(2, '0')}:00
+                        x.hour
+                    ).padStart(2, '0')}:00
                             </span>
 
                             <div class="track">
                                 <div
                                     class="fill"
                                     style="
-                                        width:${
-                                            x.avg_interactions /
-                                            max *
-                                            100
-                                        }%
+                                        width:${x.avg_interactions /
+                        max *
+                        100
+                        }%
                                     "
                                 ></div>
                             </div>
 
                             <span class="barval">
                                 ${metricFmt(
-                                    x.avg_interactions
-                                )}
+                            x.avg_interactions
+                        )}
                             </span>
                         </div>
                     `;
@@ -1884,7 +1906,7 @@ function renderInsights(ins) {
                     Top days
                 </div>
             ` +
-              dys
+            dys
                 .slice(0, 5)
                 .map(x => {
                     const max =
@@ -1906,19 +1928,18 @@ function renderInsights(ins) {
                                 <div
                                     class="fill"
                                     style="
-                                        width:${
-                                            x.avg_interactions /
-                                            max *
-                                            100
-                                        }%
+                                        width:${x.avg_interactions /
+                        max *
+                        100
+                        }%
                                     "
                                 ></div>
                             </div>
 
                             <span class="barval">
                                 ${metricFmt(
-                                    x.avg_interactions
-                                )}
+                            x.avg_interactions
+                        )}
                             </span>
                         </div>
                     `;
