@@ -1074,9 +1074,233 @@ function renderLatest() {
         )
         .join('');
 
+    // Likes, Views and Engagement trend.
+    const metricSelector = $('#trendMetric');
 
-    const sortBy = $('#contentSortFilter').value
-    // Sort posts by engagement rate.
+    const renderTrendChart = () => {
+        const metric = metricSelector.value;
+
+        const metricConfig = {
+            likes: {
+                title: 'Likes Trend',
+                label: 'Likes',
+                color: '#8b5cf6',
+                format: value => Number(value).toLocaleString()
+            },
+            views: {
+                title: 'Views Trend',
+                label: 'Views',
+                color: '#06b6d4',
+                format: value => Number(value).toLocaleString()
+            },
+            engagement_rate: {
+                title: 'Engagement Trend',
+                label: 'Engagement',
+                color: '#22c55e',
+                format: value => `${Number(value).toFixed(2)}%`
+            }
+        };
+
+        const config = metricConfig[metric] || metricConfig.likes;
+
+        $('#trendChartTitle').textContent = config.title;
+
+        const trendRecords = d.records
+            .filter(r => !r.is_profile_snapshot)
+            .map(r => ({
+                date: Date.parse(r.date),
+                value: Number(r[metric])
+            }))
+            .filter(r =>
+                !isNaN(r.date) &&
+                Number.isFinite(r.value)
+            )
+            .sort((a, b) => a.date - b.date);
+
+        const chartWidth = 900;
+        const chartHeight = 300;
+
+        const left = 65;
+        const right = 25;
+        const top = 25;
+        const bottom = 50;
+
+        const maxValue = Math.max(
+            ...trendRecords.map(r => r.value),
+            1
+        );
+
+        const chartPoints = trendRecords.map((r, i) => {
+            const x = left +
+                (i / Math.max(trendRecords.length - 1, 1)) *
+                (chartWidth - left - right);
+
+            const y = chartHeight - bottom -
+                (r.value / maxValue) *
+                (chartHeight - top - bottom);
+
+            return { x, y, ...r };
+        });
+
+        const linePoints = chartPoints
+            .map(p => `${p.x},${p.y}`)
+            .join(' ');
+
+        const chartContainer = $('#likesTrendChart');
+
+        // Clear previous chart and tooltip.
+        chartContainer.innerHTML = '';
+
+        if (trendRecords.length === 0) {
+            chartContainer.innerHTML =
+                '<div class="note">No data available for this metric.</div>';
+            return;
+        }
+
+        chartContainer.innerHTML = `
+        <svg
+            viewBox="0 0 ${chartWidth} ${chartHeight}"
+            width="100%"
+            role="img"
+            aria-label="${config.title}"
+        >
+            ${[0, 1, 2, 3, 4].map(i => {
+            const y = top +
+                (i / 4) * (chartHeight - top - bottom);
+
+            const value = maxValue * (1 - i / 4);
+
+            return `
+                    <line
+                        x1="${left}"
+                        y1="${y}"
+                        x2="${chartWidth - right}"
+                        y2="${y}"
+                        stroke="#334155"
+                        stroke-dasharray="4 5"
+                    />
+
+                    <text
+                        x="${left - 10}"
+                        y="${y + 4}"
+                        fill="#94a3b8"
+                        font-size="12"
+                        text-anchor="end"
+                    >${config.format(value)}</text>
+                `;
+        }).join('')}
+
+            <polyline
+                points="${linePoints}"
+                fill="none"
+                stroke="${config.color}"
+                stroke-width="3"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+            />
+
+            ${chartPoints.map(p => `
+                <circle
+                    cx="${p.x}"
+                    cy="${p.y}"
+                    r="5"
+                    fill="${config.color}"
+                    stroke="#ffffff"
+                    stroke-width="1.5"
+                    class="likes-node"
+                    data-date="${new Date(p.date).toLocaleDateString()}"
+                    data-value="${p.value}"
+                    style="cursor:pointer"
+                />
+            `).join('')}
+
+            ${[
+                chartPoints[0],
+                chartPoints[Math.floor(chartPoints.length / 2)],
+                chartPoints[chartPoints.length - 1]
+            ].filter((p, i, arr) =>
+                p && arr.indexOf(p) === i
+            ).map(p => `
+                <text
+                    x="${p.x}"
+                    y="${chartHeight - 15}"
+                    fill="#94a3b8"
+                    font-size="12"
+                    text-anchor="middle"
+                >
+                    ${new Date(p.date).toLocaleDateString()}
+                </text>
+            `).join('')}
+        </svg>
+    `;
+
+        // Custom floating tooltip.
+        const tooltip = document.createElement('div');
+        tooltip.className = 'likes-tooltip';
+
+        tooltip.innerHTML = `
+        <div class="tooltip-title">POST PERFORMANCE</div>
+
+        <div class="tooltip-row">
+            <span>📅 Posted</span>
+            <span class="tooltip-value tooltip-date"></span>
+        </div>
+
+        <div class="tooltip-row">
+            <span>${metric === 'likes' ? '❤️' :
+                metric === 'views' ? '👁️' : '📈'} ${config.label}</span>
+            <span class="tooltip-value tooltip-metric"></span>
+        </div>
+    `;
+
+        chartContainer.appendChild(tooltip);
+
+        chartContainer.querySelectorAll('.likes-node').forEach(node => {
+
+            node.addEventListener('mouseenter', () => {
+                tooltip.querySelector('.tooltip-date').textContent =
+                    node.dataset.date;
+
+                tooltip.querySelector('.tooltip-metric').textContent =
+                    config.format(node.dataset.value);
+
+                tooltip.style.display = 'block';
+            });
+
+            node.addEventListener('mousemove', event => {
+                const tooltipWidth = tooltip.offsetWidth;
+                const tooltipHeight = tooltip.offsetHeight;
+
+                let x = event.clientX + 15;
+                let y = event.clientY - tooltipHeight - 15;
+
+                if (x + tooltipWidth > window.innerWidth - 10) {
+                    x = event.clientX - tooltipWidth - 15;
+                }
+
+                if (y < 10) {
+                    y = event.clientY + 15;
+                }
+
+                tooltip.style.left = `${Math.max(10, x)}px`;
+                tooltip.style.top = `${y}px`;
+            });
+
+            node.addEventListener('mouseleave', () => {
+                tooltip.style.display = 'none';
+            });
+        });
+    };
+
+    // Initial chart.
+    renderTrendChart();
+
+    // Update chart whenever metric changes.
+    metricSelector.onchange = renderTrendChart;
+
+    // Sort posts based on the selected filter.
+    const sortBy = $('#contentSortFilter').value;
+
     const rows = [...d.records]
         .filter(
             r => !r.is_profile_snapshot

@@ -146,6 +146,7 @@
 
                 </div>
 
+
                 <!-- Creator Benchmark -->
                 <div class="card">
                     <div class="card-head">
@@ -313,6 +314,24 @@
                             <tbody id="postRows"></tbody>
                         </table>
                     </div>
+                </div>
+
+                <!-- Likes Trend -->
+                <div class="card">
+                    <div class="card-head">
+                        <div>
+                            <h3 id="trendChartTitle">Likes Trend</h3>
+                            <p>Performance from oldest to latest post</p>
+                        </div>
+
+                        <select id="trendMetric">
+                            <option value="likes">Likes</option>
+                            <option value="views">Views</option>
+                            <option value="engagement_rate">Engagement (%)</option>
+                        </select>
+                    </div>
+
+                    <div id="likesTrendChart"></div>
                 </div>
 
                 <!-- Insights -->
