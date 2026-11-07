@@ -1,3 +1,4 @@
+from os import path
 import os, json, uuid, glob, csv, io
 from datetime import datetime, timezone
 import time
@@ -20,13 +21,58 @@ def payload(records, source_ref="", run_id=None):
 def json_dump(path,data):
     with open(path,"w",encoding="utf-8") as f: json.dump(data,f,ensure_ascii=False,indent=2)
 
+def analysis_folder(records):
+    platforms = {
+        r.get("platform")
+        for r in records
+        if r.get("platform") in PLATFORMS
+    }
+
+    if len(platforms) == 1:
+        return platforms.pop()
+
+    return "cross_analysis"
+
+def find_saved_path(run_id):
+    path = os.path.basename(run_id)
+    if not run_id or path != run_id:
+        return None
+
+    matches = glob.glob(
+        os.path.join(STORAGE, "**", run_id + ".json"),
+        recursive=True
+    )
+
+    return matches[0] if matches else None
+
 def saved_runs():
     out=[]
-    for p in glob.glob(os.path.join(STORAGE,"*.json")):
+    for p in glob.glob(os.path.join(STORAGE,"**","*.json"), recursive=True):
         try:
-            d=json.load(open(p,encoding="utf-8")); out.append({"run_id":d.get("run_id"),"created_at":d.get("created_at"),"platforms":sorted(set(r.get("platform") for r in d.get("records",[]))),"posts":len(d.get("records",[])),"source_ref":d.get("source_ref",""),"file":os.path.basename(p)})
-        except Exception: pass
-    return sorted(out,key=lambda x:x.get("created_at",""),reverse=True)
+            with open(p, encoding="utf-8") as f:
+                d = json.load(f)
+
+            out.append({
+                "run_id": d.get("run_id"),
+                "created_at": d.get("created_at"),
+                "platforms": sorted(set(
+                    r.get("platform")
+                    for r in d.get("records", [])
+                    if r.get("platform")
+                )),
+                "posts": len(d.get("records", [])),
+                "source_ref": d.get("source_ref", ""),
+                "file": os.path.basename(p)
+            })
+
+        except Exception:
+            pass
+        
+    return sorted(
+        out,
+        key=lambda x:x.get("created_at",""),
+        reverse=True
+    )
 
 @app.get("/")
 def home(): return render_template("index.html")
@@ -78,39 +124,99 @@ def analyze(platform):
 
 @app.post("/api/save")
 def save():
-    data=request.get_json(silent=True) or {}; records=data.get("records") or []
-    if not records:return jsonify({"error":"Nothing to save. Run at least one live analysis first."}),400
-    run=payload(records,data.get("source_ref",""),data.get("run_id"))
-    path=os.path.join(STORAGE,run["run_id"]+".json"); json_dump(path,run)
-    return jsonify({"ok":True,"run_id":run["run_id"],"file":os.path.basename(path),"created_at":run["created_at"]})
+    data=request.get_json(silent=True) or {} 
+    records=data.get("records") or []
+    print("PLATFORMS:", PLATFORMS)
+
+    print("RECORD PLATFORMS:", {
+        r.get("platform") for r in records
+    })
+
+    print("SELECTED FOLDER:", analysis_folder(records))
+    if not records:
+        return jsonify({
+            "error":"Nothing to save. Run at least one live analysis first."
+        }),400
+    run=payload(
+        records,
+        data.get("source_ref",""),
+        data.get("run_id")
+    )
+    folder = analysis_folder(records)
+    directory = os.path.join(STORAGE, folder)
+    os.makedirs(directory, exist_ok=True)
+    path=os.path.join(directory, run["run_id"]+".json")
+    json_dump(path,run)
+    return jsonify({
+        "ok":True,
+        "run_id":run["run_id"],
+        "file":os.path.basename(path),
+        "created_at":run["created_at"]
+    })
 
 @app.get("/api/saved")
-def saved(): return jsonify(saved_runs())
+def saved(): 
+    return jsonify(saved_runs())
 
 @app.get("/api/saved/<run_id>")
 def saved_one(run_id):
-    path=os.path.join(STORAGE,run_id+".json")
-    if not os.path.exists(path):return jsonify({"error":"Saved analysis not found"}),404
-    return jsonify(json.load(open(path,encoding="utf-8")))
+    path=find_saved_path(run_id)
+    if not path:
+        return jsonify({
+            "error":"Saved analysis not found"
+        }),404
+    with open(path, encoding="utf-8") as f:
+        return jsonify(json.load(f))
 
 @app.delete("/api/saved/<run_id>")
 def delete_saved(run_id):
-    path=os.path.join(STORAGE,run_id+".json")
-    if not os.path.exists(path):return jsonify({"error":"Not found"}),404
-    os.remove(path); return jsonify({"ok":True})
+    path=find_saved_path(run_id)
+
+    if not path:
+        return jsonify({
+            "error":"Not found"
+        }),404
+    os.remove(path)
+    return jsonify({"ok":True})
 
 @app.post("/api/save-all")
 def save_all():
-    data=request.get_json(silent=True) or {}; records=data.get("records") or []
-    if not records:return jsonify({"error":"No current analytics to save."}),400
-    run=payload(records,"Cross-platform workspace",data.get("run_id")); path=os.path.join(STORAGE,run["run_id"]+".json"); json_dump(path,run); return jsonify({"ok":True,"run_id":run["run_id"],"file":os.path.basename(path)})
+    data=request.get_json(silent=True) or {} 
+    records=data.get("records") or []
+    if not records:
+        return jsonify({
+            "error":"No current analytics to save."
+        }),400
+    run=payload(
+        records,
+        "Cross-platform workspace",
+        data.get("run_id")
+    )
+    directory = os.path.join(STORAGE, "cross_analysis")
+    os.makedirs(directory, exist_ok=True)
 
+    path = os.path.join(directory, run["run_id"] + ".json")
+    json_dump(path, run)
+
+    return jsonify({
+        "ok": True,
+        "run_id": run["run_id"],
+        "file": os.path.basename(path)
+    })
 @app.get("/api/export")
 def export_data():
-    run_id=request.args.get("run_id","").strip(); path=os.path.join(STORAGE,run_id+".json")
-    if not run_id or not os.path.exists(path): return jsonify({"error":"Saved analysis not found"}),404
-    return send_file(path,as_attachment=True,download_name=f"social-media-analysis-{run_id}.json",mimetype="application/json")
-
+    run_id=request.args.get("run_id","").strip()
+    path=find_saved_path(run_id)
+    if not path: 
+        return jsonify({
+            "error":"Saved analysis not found"
+        }),404
+    return send_file(
+        path,
+        as_attachment=True,
+        download_name=f"social-media-analysis-{run_id}.json",
+        mimetype="application/json"
+    )
 CSV_COLUMNS=["platform","username","name","followers","post_id","date","media_type","text","likes","comments","shares","views","interactions","engagement_rate","sentiment","compound","url"]
 
 @app.post("/api/insights")
@@ -139,10 +245,36 @@ def export_csv():
 @app.get("/api/cross")
 def cross_api():
     records=[]
-    for p in glob.glob(os.path.join(STORAGE,"*.json")):
-        try: records+=json.load(open(p,encoding="utf-8")).get("records",[])
-        except Exception: pass
-    return jsonify({"records":records,"summary":summary(records),"sentiment":sentiment_summary(records),"creators":cross(records),"insights":insights(records)})
+    paths = glob.glob(os.path.join(STORAGE,"*.json"))
+    for platform in PLATFORMS:
+        paths += glob.glob(
+            os.path.join(STORAGE, platform, "*.json")
+        )
+    for p in paths:
+        try:
+            with open(p, encoding="utf-8") as f:
+                data = json.load(f)
+            saved_records = data.get("records", [])
+            if os.path.dirname(p) == STORAGE:
+                platforms = {
+                    r.get("platform")
+                    for r in saved_records
+                    if r.get("platform")
+                }
+
+                if len(platforms) != 1:
+                    continue
+            records.extend(saved_records)
+        except Exception:
+            pass
+
+        return jsonify({
+            "records": records,
+            "summary": summary(records),
+            "sentiment": sentiment_summary(records),
+            "creators": cross(records),
+            "insights": insights(records)
+        })
 
 if __name__=="__main__":
     app.run(host="0.0.0.0",port=int(os.getenv("PORT",5000)),debug=True)

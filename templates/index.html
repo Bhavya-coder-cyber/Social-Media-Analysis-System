@@ -442,9 +442,19 @@
                             <p>Load, download or delete any snapshot.</p>
                         </div>
 
-                        <button id="reloadSaved" class="ghost">
-                            Refresh list
-                        </button>
+                        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                            <button id="reloadSaved" class="ghost">
+                                Refresh list
+                            </button>
+
+                            <button id="runCrossAnalysis" class="primary">
+                                Run Cross-Analysis
+                            </button>
+                        </div>
+                    </div>
+
+                    <div id="crossSelectionInfo" class="note">
+                        Select two or more saved analyses to compare platforms.
                     </div>
 
                     <div id="savedList" class="saved-list"></div>

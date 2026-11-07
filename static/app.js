@@ -955,6 +955,9 @@ function renderLatest() {
 
         renderInsights(null);
 
+        $('#likesTrendChart').innerHTML = '';
+        $('#trendChartTitle').textContent = 'Likes Trend';
+
         return;
     }
 
@@ -1079,6 +1082,14 @@ function renderLatest() {
 
     const renderTrendChart = () => {
         const metric = metricSelector.value;
+        const currentData = platformState().latest;
+        const chartContainer = $('#likesTrendChart');
+
+        // Never render data from a previous analysis.
+        if (!currentData || !Array.isArray(currentData.records)) {
+            chartContainer.innerHTML = '';
+            return;
+        }
 
         const metricConfig = {
             likes: {
@@ -1105,7 +1116,7 @@ function renderLatest() {
 
         $('#trendChartTitle').textContent = config.title;
 
-        const trendRecords = d.records
+        const trendRecords = currentData.records
             .filter(r => !r.is_profile_snapshot)
             .map(r => ({
                 date: Date.parse(r.date),
@@ -1116,6 +1127,17 @@ function renderLatest() {
                 Number.isFinite(r.value)
             )
             .sort((a, b) => a.date - b.date);
+
+        // Clear the previous analysis before rendering the current one.
+        chartContainer.innerHTML = '';
+
+        if (trendRecords.length === 0) {
+            chartContainer.innerHTML = `
+        <p class="empty-state">No ${metric === 'engagement_rate' ? 'engagement' : metric}
+        data available for this analysis.</p>
+    `;
+            return;
+        }
 
         const chartWidth = 900;
         const chartHeight = 300;
@@ -1145,8 +1167,6 @@ function renderLatest() {
         const linePoints = chartPoints
             .map(p => `${p.x},${p.y}`)
             .join(' ');
-
-        const chartContainer = $('#likesTrendChart');
 
         // Clear previous chart and tooltip.
         chartContainer.innerHTML = '';
@@ -1567,6 +1587,7 @@ async function saveRecords(
         toast(
             'Analysis saved locally.'
         );
+        await loadSaved();
 
         return d;
     } catch (e) {
@@ -1584,22 +1605,28 @@ async function loadSaved() {
         await api('/api/saved');
 
     $('#savedList').innerHTML =
-        list
-            .map(
-                x => `
-                    <div class="saved-item">
-                        <div>
-                            <strong>
+        list.map(
+            x => `
+        <div class="saved-item">
+    <div>
+        <input
+            type="checkbox"
+            class="cross-analysis-checkbox"
+            value="${esc(x.run_id)}"
+            aria-label="Select analysis for cross-analysis"
+        />
+
+        <strong>
                                 ${esc(
-                    x.source_ref ||
-                    'Cross-platform workspace'
-                )}
+                x.source_ref ||
+                'Cross-platform workspace'
+            )}
                             </strong>
 
                             <small>
                                 ${new Date(
-                    x.created_at
-                ).toLocaleString()}
+                x.created_at
+            ).toLocaleString()}
                                 · ${x.posts} posts
                                 · ${x.platforms.join(', ')}
                             </small>
@@ -1629,7 +1656,7 @@ async function loadSaved() {
                         </div>
                     </div>
                 `
-            )
+        )
             .join('') ||
         `
             <div class="note">
@@ -1671,6 +1698,7 @@ async function loadSaved() {
                 );
             }
     );
+    $('#runCrossAnalysis').onclick = runSelectedCrossAnalysis;
 }
 
 
@@ -1711,6 +1739,34 @@ async function loadOne(id) {
 }
 
 
+async function runSelectedCrossAnalysis() {
+    const selectedIds = Array.from(
+        $$('.cross-analysis-checkbox:checked')
+    ).map(checkbox => checkbox.value);
+
+    if (selectedIds.length < 2) {
+        toast('Select at least two analyses to compare.');
+        return;
+    }
+
+    try {
+        const analyses = await Promise.all(
+            selectedIds.map(id =>
+                api('/api/saved/' + encodeURIComponent(id))
+            )
+        );
+
+        state.workspace = analyses;
+
+        setPage('cross');
+
+        toast('Cross-platform analysis loaded successfully.');
+    } catch (error) {
+        toast(error.message);
+    }
+}
+
+
 // ============================================================
 // SAVE ENTIRE WORKSPACE
 // ============================================================
@@ -1737,7 +1793,7 @@ async function saveAll() {
                 })
             }
         );
-
+        await loadSaved();
         toast(
             'Entire cross-platform workspace saved.'
         );
