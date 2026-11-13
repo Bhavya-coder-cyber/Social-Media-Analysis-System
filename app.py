@@ -6,6 +6,14 @@ from flask import Flask, jsonify, render_template, request, send_file, Response
 from dotenv import load_dotenv
 from services.analytics import normalize, normalize_linkedin, summary, sentiment_summary, cross, insights, PLATFORMS, sentiment
 from scrapers.live import instagram, x, linkedin, youtube
+from services.ai_context import build_ai_context
+from services.ai_providers.openai_client import generate_insights
+from services.forecasting import forecast_all_metrics
+from services.forecasting import (
+    prepare_historical_data,
+    forecast_metric,
+    evaluate_model
+)
 
 BASE=os.path.dirname(os.path.abspath(__file__))
 STORAGE=os.path.join(BASE,"storage")
@@ -221,11 +229,186 @@ CSV_COLUMNS=["platform","username","name","followers","post_id","date","media_ty
 
 @app.post("/api/insights")
 def insights_api():
-    data=request.get_json(silent=True) or {}
-    records=data.get("records") or []
-    if not records: return jsonify({"error":"No records supplied."}),400
+    data = request.get_json(silent=True) or {}
+
+    records = data.get("records") or []
+
+    if not records:
+        return jsonify({"error": "No records supplied."}), 400
+
     return jsonify(insights(records))
 
+@app.post("/api/ai/context")
+def ai_context_api():
+    data = request.get_json(silent=True) or {}
+
+    selected_ids = data.get("selected_ids") or []
+
+    if not selected_ids:
+        return jsonify({"error": "No analyses selected."}), 400
+
+    try:
+        analyses = []
+
+        for run_id in selected_ids:
+            path = find_saved_path(run_id)
+
+            if not path:
+                return jsonify({
+                    "error": f"Saved analysis not found: {run_id}"
+                }), 404
+
+            with open(path, "r", encoding="utf-8") as file:
+                analyses.append(json.load(file))
+
+        context = build_ai_context(analyses)
+
+        return jsonify(context)
+
+    except ValueError as error:
+        return jsonify({"error": str(error)}), 400
+
+    except Exception as error:
+        return jsonify({"error": str(error)}), 500
+
+@app.post("/api/ai/analyze")
+def ai_analyze_api():
+    data = request.get_json(silent=True) or {}
+
+    selected_ids = data.get("selected_ids") or []
+
+    if not selected_ids:
+        return jsonify({"error": "No analyses selected."}), 400
+
+    try:
+        analyses = []
+
+        for run_id in selected_ids:
+            path = find_saved_path(run_id)
+
+            if not path:
+                return jsonify({
+                    "error": f"Saved analysis not found: {run_id}"
+                }), 404
+
+            with open(path, "r", encoding="utf-8") as file:
+                analyses.append(json.load(file))
+
+        # Prepare standardized analytics context
+        context = build_ai_context(analyses)
+
+        # Generate insights using OpenAI
+        ai_result = generate_insights(context)
+
+        return jsonify({
+            "success": True,
+            "provider": "openai",
+            "insights": ai_result
+        })
+
+    except ValueError as error:
+        return jsonify({"error": str(error)}), 400
+
+    except Exception as error:
+        return jsonify({"error": str(error)}), 500
+
+
+@app.post("/api/forecast")
+def forecast_api():
+    data = request.get_json(silent=True) or {}
+    selected_ids = data.get("selected_ids") or []
+
+    if not selected_ids:
+        return jsonify({"error": "No analyses selected."}), 400
+
+    try:
+        analyses = []
+
+        # Load selected saved analyses
+        for run_id in selected_ids:
+            saved_path = find_saved_path(run_id)
+
+            if not saved_path:
+                return jsonify({
+                    "error": f"Saved analysis not found: {run_id}"
+                }), 404
+
+            with open(saved_path, "r", encoding="utf-8") as file:
+                analyses.append(json.load(file))
+
+        # Collect records separately by platform
+        platform_records = {}
+
+        for analysis in analyses:
+            for record in analysis.get("records", []):
+                if record.get("is_profile_snapshot"):
+                    continue
+
+                platform = record.get("platform")
+
+                if not platform:
+                    continue
+
+                platform_records.setdefault(platform, []).append(record)
+
+        forecast_results = {}
+
+        # Generate forecasts independently for each platform
+        for platform, records in platform_records.items():
+
+            daily_data = prepare_historical_data(records)
+
+            platform_forecasts = {}
+
+            metrics = [
+                "total_views",
+                "total_interactions",
+                "average_engagement_rate"
+            ]
+
+            for metric in metrics:
+                try:
+                    forecast_result = forecast_metric(
+                        daily_data,
+                        metric=metric,
+                        periods=7
+                    )
+
+                    forecast_result["historical"] = [
+                        {
+                            "date": item["date"],
+                            "value": item[metric]
+                        }
+                        for item in daily_data
+                    ]
+
+                    platform_forecasts[metric] = forecast_result
+
+                except ValueError as error:
+                    platform_forecasts[metric] = {
+                        "available": False,
+                        "reason": str(error)
+                    }
+
+            forecast_results[platform] = {
+                "historical_observations": len(daily_data),
+                "forecasts": platform_forecasts
+            }
+
+        return jsonify({
+            "success": True,
+            "forecast_periods": 7,
+            "platforms": forecast_results,
+            "follower_forecast": {
+                "available": False,
+                "reason": "Historical follower snapshots are required."
+            }
+        })
+
+    except Exception as error:
+        return jsonify({"error": str(error)}), 500
+
+    
 @app.post("/api/export-csv")
 def export_csv():
     data=request.get_json(silent=True) or {}
@@ -241,6 +424,62 @@ def export_csv():
     stamp=datetime.now(timezone.utc).strftime("%Y%m%d-%H%M%S")
     return Response(buf.getvalue(),mimetype="text/csv",
         headers={"Content-Disposition":f"attachment; filename=social-media-analysis-{stamp}.csv"})
+
+@app.get("/api/ai/forecast")
+def ai_forecast_api():
+    data = request.get_json(silent=True) or {}
+    selected_ids = data.get("selected_ids") or []
+    if not selected_ids:
+        return jsonify({"error": "No analyses selected."}), 400
+
+    try:
+        records = []
+
+        # Load selected saved analyses
+        for run_id in selected_ids:
+            path = find_saved_path(run_id)
+
+            if not path:
+                return jsonify({
+                    "error": f"Saved analysis not found: {run_id}"
+                }), 404
+
+            with open(path, "r", encoding="utf-8") as file:
+                analysis = json.load(file)
+
+            records.extend(analysis.get("records", []))
+
+        if not records:
+            return jsonify({"error": "No records found."}), 400
+
+        # Keep the current follower count as profile context
+        platform_followers = {}
+
+        for record in records:
+            platform = record.get("platform")
+            followers = record.get("followers") or 0
+
+            if platform:
+                platform_followers[platform] = max(
+                    platform_followers.get(platform, 0),
+                    followers
+                )
+
+        # Generate numerical forecasts
+        forecasts = forecast_all_metrics(records, periods=7)
+
+        return jsonify({
+            "success": True,
+            "forecasts": forecasts,
+            "current_followers": platform_followers
+        })
+
+    except ValueError as error:
+        return jsonify({"error": str(error)}), 400
+
+    except Exception as error:
+        return jsonify({"error": str(error)}), 500
+
 
 @app.get("/api/cross")
 def cross_api():

@@ -1441,3 +1441,462 @@ input {
     flex-shrink: 0;
     cursor: pointer;
 }
+
+
+/* ==================================================
+   AI GROWTH INTELLIGENCE - COMPLETE REPORT DESIGN
+================================================== */
+
+/* Main report container */
+
+.ai-report {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    padding: 12px 0;
+    color: #e5e7eb;
+    font-family: inherit;
+    box-sizing: border-box;
+}
+
+.ai-report * {
+    box-sizing: border-box;
+}
+
+/* Header */
+
+.ai-report .ai-report-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    padding: 18px 20px;
+    background: #111827;
+    border: 1px solid #263449;
+    border-radius: 12px;
+}
+
+.ai-report .ai-eyebrow {
+    display: block;
+    color: #94a3b8;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1.2px;
+    margin-bottom: 6px;
+}
+
+.ai-report .ai-report-header h2 {
+    color: #f8fafc;
+    font-size: 21px;
+    font-weight: 700;
+    margin: 0 0 7px;
+}
+
+.ai-report .ai-report-header p {
+    color: #a1a1aa;
+    font-size: 13px;
+    margin: 0;
+    line-height: 1.5;
+}
+
+.ai-report .ai-confidence {
+    display: inline-flex;
+    align-items: center;
+    padding: 6px 12px;
+    border-radius: 20px;
+    background: #052e16;
+    color: #4ade80;
+    border: 1px solid #166534;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+/* Common section styling */
+
+.ai-report .ai-section {
+    min-width: 0;
+    padding: 17px 19px;
+    background: #111827;
+    border: 1px solid #263449;
+    border-radius: 12px;
+}
+
+.ai-report .ai-section h3 {
+    color: #f8fafc;
+    font-size: 16px;
+    font-weight: 700;
+    margin: 0 0 11px;
+}
+
+.ai-report .ai-section p {
+    color: #d1d5db;
+    font-size: 14px;
+    line-height: 1.65;
+    margin: 6px 0;
+}
+
+.ai-report .ai-description {
+    color: #94a3b8;
+    font-size: 12px;
+    margin: 0 0 12px;
+}
+
+/* Account overview */
+
+.ai-report .ai-overview {
+    background: #111827;
+    border: 1px solid #334155;
+    border-left: 4px solid #3b82f6;
+}
+
+/* Strengths and improvements layout */
+
+.ai-report .ai-two-column {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+    align-items: stretch;
+}
+
+/* GREEN - Strengths */
+
+.ai-report .ai-two-column > .ai-section.ai-strengths {
+    background: #092719 !important;
+    border: 1px solid #166534 !important;
+    border-left: 4px solid #22c55e !important;
+}
+
+.ai-report .ai-strengths h3 {
+    color: #86efac !important;
+}
+
+.ai-report .ai-strengths p,
+.ai-report .ai-strengths li {
+    color: #dcfce7 !important;
+}
+
+/* YELLOW - Improvements */
+
+.ai-report .ai-two-column > .ai-section.ai-weaknesses {
+    background: #302609 !important;
+    border: 1px solid #a16207 !important;
+    border-left: 4px solid #eab308 !important;
+}
+
+.ai-report .ai-weaknesses h3 {
+    color: #fde047 !important;
+}
+
+.ai-report .ai-weaknesses p,
+.ai-report .ai-weaknesses li {
+    color: #fef3c7 !important;
+}
+
+/* Lists */
+
+.ai-report .ai-list {
+    padding-left: 19px;
+    margin: 0;
+}
+
+.ai-report .ai-list li {
+    color: #d1d5db;
+    font-size: 13px;
+    line-height: 1.65;
+    margin-bottom: 7px;
+}
+
+.ai-report .ai-list li:last-child {
+    margin-bottom: 0;
+}
+
+/* Hashtags, creators and content cards */
+
+.ai-report .ai-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+}
+
+.ai-report .ai-item {
+    min-width: 0;
+    padding: 14px;
+    background: #0b1220;
+    border: 1px solid #263449;
+    border-radius: 10px;
+    transition: border-color 0.2s ease;
+}
+
+.ai-report .ai-item:hover {
+    border-color: #475569;
+}
+
+.ai-report .ai-item h4 {
+    color: #f1f5f9;
+    font-size: 14px;
+    font-weight: 650;
+    margin: 8px 0;
+}
+
+.ai-report .ai-item p {
+    color: #cbd5e1;
+    font-size: 13px;
+    line-height: 1.55;
+    margin: 7px 0;
+}
+
+.ai-report .ai-item small {
+    display: block;
+    color: #94a3b8;
+    font-size: 12px;
+    line-height: 1.5;
+    margin-top: 7px;
+}
+
+/* Hashtag badges */
+
+.ai-report .ai-hashtag {
+    display: inline-block;
+    color: #38bdf8;
+    background: #082f49;
+    border: 1px solid #075985;
+    border-radius: 20px;
+    padding: 5px 10px;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+/* Creator and content format labels */
+
+.ai-report .ai-tag {
+    display: inline-block;
+    color: #93c5fd;
+    background: #172554;
+    border: 1px solid #1e40af;
+    border-radius: 20px;
+    padding: 4px 9px;
+    font-size: 11px;
+    font-weight: 600;
+}
+
+/* Weekly action plan */
+
+.ai-report .ai-weekly-plan {
+    display: flex;
+    flex-direction: column;
+}
+
+.ai-report .ai-plan-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    padding: 11px 4px;
+    border-bottom: 1px solid #263449;
+}
+
+.ai-report .ai-plan-item:last-child {
+    border-bottom: none;
+}
+
+.ai-report .ai-plan-item strong {
+    flex: 0 0 100px;
+    color: #60a5fa;
+    font-size: 13px;
+}
+
+.ai-report .ai-plan-item p {
+    flex: 1;
+    color: #d1d5db;
+    font-size: 13px;
+    margin: 0;
+    line-height: 1.55;
+}
+
+/* Empty states */
+
+.ai-report .ai-empty {
+    color: #94a3b8;
+    font-size: 12px;
+    font-style: italic;
+}
+
+/* Responsive design */
+
+@media (max-width: 700px) {
+
+    .ai-report .ai-two-column,
+    .ai-report .ai-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .ai-report .ai-report-header {
+        padding: 15px;
+    }
+
+    .ai-report .ai-report-header h2 {
+        font-size: 19px;
+    }
+
+    .ai-report .ai-section {
+        padding: 14px;
+    }
+
+    .ai-report .ai-plan-item {
+        gap: 9px;
+    }
+
+    .ai-report .ai-plan-item strong {
+        flex-basis: 85px;
+    }
+}
+
+
+/* Growth Forecast Report */
+
+.forecast-report {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    padding: 12px 0;
+}
+
+.forecast-heading,
+.forecast-platform,
+.forecast-follower {
+    padding: 16px;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+}
+
+.forecast-heading h3,
+.forecast-platform h3,
+.forecast-follower h3 {
+    font-size: 16px;
+    margin: 0 0 8px;
+}
+
+.forecast-heading p,
+.forecast-follower p,
+.forecast-meta,
+.forecast-disclaimer {
+    color: var(--muted);
+    font-size: 12px;
+    line-height: 1.6;
+}
+
+.forecast-platform-header,
+.forecast-metric-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+}
+
+.forecast-platform-header span,
+.forecast-metric-header span {
+    color: var(--muted);
+    font-size: 12px;
+}
+
+.forecast-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+}
+
+.forecast-metric {
+    padding: 13px;
+    border: 1px solid var(--border);
+    border-radius: 9px;
+    background: var(--surface);
+}
+
+.forecast-metric h4 {
+    font-size: 14px;
+    margin: 0;
+}
+
+.forecast-values {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    margin-top: 12px;
+}
+
+.forecast-value {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    font-size: 12px;
+}
+
+.forecast-value span {
+    color: var(--muted);
+}
+
+.forecast-value strong {
+    font-weight: 600;
+}
+
+.forecast-unavailable {
+    color: var(--muted);
+    font-size: 12px;
+}
+
+.forecast-disclaimer {
+    margin: 0;
+}
+
+@media (max-width: 700px) {
+    .forecast-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Forecast line charts */
+
+.forecast-chart {
+    width: 100%;
+    margin: 12px 0;
+    overflow: hidden;
+}
+
+.forecast-chart svg {
+    display: block;
+    width: 100%;
+    height: auto;
+}
+
+.forecast-legend {
+    display: flex;
+    gap: 18px;
+    flex-wrap: wrap;
+    margin-bottom: 10px;
+    color: var(--muted);
+    font-size: 12px;
+}
+
+.forecast-legend span {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+}
+
+.history-dot,
+.prediction-dot {
+    width: 18px;
+    height: 3px;
+    display: inline-block;
+    border-radius: 4px;
+}
+
+.history-dot {
+    background: #3b82f6;
+}
+
+.prediction-dot {
+    background: #22c55e;
+}

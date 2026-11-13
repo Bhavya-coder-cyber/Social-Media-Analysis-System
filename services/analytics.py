@@ -184,6 +184,35 @@ def _metric(p, keys):
                 return value
     return 0
 
+def _metric_available(p, keys):
+    """Check whether a metric was actually supplied by the source."""
+    if not isinstance(p, dict):
+        return False
+
+    containers = [p]
+
+    for container in _METRIC_CONTAINERS:
+        sub = p.get(container)
+        if isinstance(sub, dict):
+            containers.append(sub)
+
+    for source in containers:
+        for key in keys:
+            value = source.get(key)
+
+            if value is None or value == "":
+                continue
+
+            if isinstance(value, (list, dict)):
+                continue
+
+            # Instagram uses -1 to indicate hidden like counts.
+            if str(value).strip() == "-1":
+                continue
+
+            return True
+
+    return False
 
 def _count_of(value):
     """Some actors return reactions/comments as a list of objects rather than a count."""
@@ -221,7 +250,7 @@ def _identity(p, fallback_username, fallback_name):
     return username, name, followers
 
 
-def base(platform, username, name, followers, raw, i, text, likes, comments, shares, views, interactions, label, compound, date, url, post_id, media_type, is_profile_snapshot=False):
+def base(platform, username, name, followers, raw, i, text, likes, comments, shares, views, interactions, label, compound, date, url, post_id, media_type, is_profile_snapshot=False, metric_availability=None):
     er = round(interactions / views * 100, 2) if views else round(interactions / followers * 100, 2) if followers else 0
     return {
         "platform": platform,
@@ -235,6 +264,7 @@ def base(platform, username, name, followers, raw, i, text, likes, comments, sha
         "likes": likes,
         "comments": comments,
         "shares": shares,
+        "metric_availability": metric_availability or {},
         "views": views,
         "interactions": interactions,
         "engagement_rate": er,
@@ -317,7 +347,13 @@ def normalize_linkedin(profile_items, post_items, requested_ref=""):
         media_type = first(p, "post_type", "postType", "mediaType", "media_type", "type", default="Post")
         out.append(base(
             "linkedin", u, n, followers, p, i, txt, likes, comments, shares, views,
-            likes + comments + shares, label, comp, _date(p), _url(p), _id(p, i, "linkedin", u), media_type
+            likes + comments + shares, label, comp, _date(p), _url(p), _id(p, i, "linkedin", u), media_type,
+            metric_availability={
+                "likes": _metric_available(p, LIKE_KEYS) or isinstance(p.get("reactions"), list),
+                "comments": _metric_available(p, COMMENT_KEYS) or isinstance(p.get("comments"), list),
+                "shares": _metric_available(p, SHARE_KEYS),
+                "views": _metric_available(p, VIEW_KEYS)
+            }
         ))
 
     # If the selected profile actor returned only the profile and no posts, retain a
@@ -350,7 +386,13 @@ def normalize(platform, source, requested_ref=""):
             out.append(base(
                 platform, username, username, followers, p, i, title or desc, likes, comments, shares,
                 views, inter, label, c, _date(p), first(p, "url", default=""),
-                first(p, "video_id", "videoId", "id", default=""), first(p, "media_type", "type", default="Video")
+                first(p, "video_id", "videoId", "id", default=""), first(p, "media_type", "type", default="Video"),
+                metric_availability={
+                    "likes": _metric_available(p, LIKE_KEYS) or isinstance(p.get("reactions"), list),
+                    "comments": _metric_available(p, COMMENT_KEYS) or isinstance(p.get("comments"), list),
+                    "shares": _metric_available(p, SHARE_KEYS),
+                    "views": _metric_available(p, VIEW_KEYS)
+                }
             ))
         return profile, out
 
@@ -419,7 +461,13 @@ def normalize(platform, source, requested_ref=""):
         media_type = first(p, "media_type", "mediaType", "product_type", "productType", "type", default="Post")
         out.append(base(
             platform, u, n, followers_here, p, i, txt, likes, comments, shares, views,
-            likes + comments + shares, label, c, _date(p), _url(p), _id(p, i, platform, u), media_type
+            likes + comments + shares, label, c, _date(p), _url(p), _id(p, i, platform, u), media_type,
+            metric_availability={
+                "likes": _metric_available(p, LIKE_KEYS) or isinstance(p.get("reactions"), list),
+                "comments": _metric_available(p, COMMENT_KEYS) or isinstance(p.get("comments"), list),
+                "shares": _metric_available(p, SHARE_KEYS),
+                "views": _metric_available(p, VIEW_KEYS)
+            }
         ))
 
     return profile, out
@@ -501,8 +549,15 @@ def insights(records, top_n=10):
     top_posts = sorted(content, key=lambda r: num(r.get("interactions")), reverse=True)[:top_n]
     return {
         "top_hashtags": rank(tag_stats)[:top_n],
-        "best_hours": rank(hour_stats)[:8],
-        "best_days": rank(day_stats)[:7],
+        "best_hours": [
+            row for row in rank(hour_stats)
+            if row["posts"] >= 3
+        ][:8],
+
+        "best_days": [
+            row for row in rank(day_stats)
+            if row["posts"] >= 3
+        ][:7],
         "top_posts": [{
             "platform": r.get("platform"), "url": r.get("url"),
             "text": (r.get("text") or "")[:180], "likes": num(r.get("likes")),

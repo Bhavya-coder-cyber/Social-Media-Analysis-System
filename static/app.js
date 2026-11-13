@@ -1767,6 +1767,530 @@ async function runSelectedCrossAnalysis() {
 }
 
 
+async function generateAIInsights() {
+    const selectedIds = Array.from(
+        $$('.cross-analysis-checkbox:checked')
+    ).map(checkbox => checkbox.value);
+
+    if (selectedIds.length === 0) {
+        toast('Select at least one saved analysis.');
+        return;
+    }
+
+    const button = $('#generateAIInsights');
+
+    try {
+        button.disabled = true;
+        button.textContent = 'Generating insights...';
+
+        const result = await api('/api/ai/analyze', {
+            method: 'POST',
+            body: JSON.stringify({
+                selected_ids: selectedIds
+            })
+        });
+
+        const platformInsights = result.insights?.platform_insights || [];
+
+        // Reusable HTML generators
+        const renderList = (items) => {
+            if (!Array.isArray(items) || !items.length) {
+                return '<p class="ai-empty">No information available.</p>';
+            }
+
+            return `
+                <ul class="ai-list">
+                    ${items.map(item => `
+                        <li>${esc(item)}</li>
+                    `).join('')}
+                </ul>
+            `;
+        };
+
+        const renderHashtags = (items) => {
+            if (!Array.isArray(items) || !items.length) {
+                return '<p class="ai-empty">No hashtag suggestions available.</p>';
+            }
+
+            return items.map(item => `
+                <div class="ai-item">
+                    <strong class="ai-hashtag">
+                        ${esc(item.hashtag)}
+                    </strong>
+                    <p>${esc(item.reason)}</p>
+                    <small>${esc(item.how_to_use)}</small>
+                </div>
+            `).join('');
+        };
+
+        const renderCreators = (items) => {
+            if (!Array.isArray(items) || !items.length) {
+                return '<p class="ai-empty">No creator suggestions available.</p>';
+            }
+
+            return items.map(item => `
+                <div class="ai-item">
+                    <h4>${esc(item.name)}</h4>
+                    <span class="ai-tag">${esc(item.platform)}</span>
+                    <p><strong>Known for:</strong> ${esc(item.known_for)}</p>
+                    <p><strong>Their approach:</strong> ${esc(item.their_tactic)}</p>
+                    <p><strong>What you can learn:</strong> ${esc(item.how_to_apply)}</p>
+                </div>
+            `).join('');
+        };
+
+        const renderContentIdeas = (items) => {
+            if (!Array.isArray(items) || !items.length) {
+                return '<p class="ai-empty">No content ideas available.</p>';
+            }
+
+            return items.map(item => `
+                <div class="ai-item">
+                    <span class="ai-tag">${esc(item.format)}</span>
+                    <h4>${esc(item.idea)}</h4>
+                    <p><strong>Opening line:</strong> ${esc(item.caption_hook)}</p>
+                </div>
+            `).join('');
+        };
+
+        const renderGrowthTips = (items) => {
+            if (!Array.isArray(items) || !items.length) {
+                return '<p class="ai-empty">No growth tips available.</p>';
+            }
+
+            return items.map(item => `
+                <div class="ai-item">
+                    <h4>${esc(item.title)}</h4>
+                    <p>${esc(item.explanation)}</p>
+                    <p><strong>What to do:</strong> ${esc(item.action)}</p>
+                </div>
+            `).join('');
+        };
+
+        const renderWeeklyPlan = (items) => {
+            if (!Array.isArray(items) || !items.length) {
+                return '<p class="ai-empty">No weekly plan available.</p>';
+            }
+
+            return items.map(item => `
+                <div class="ai-plan-item">
+                    <strong>${esc(item.day)}</strong>
+                    <p>${esc(item.task)}</p>
+                </div>
+            `).join('');
+        };
+
+                
+        // Render a separate report for each platform
+        $('#aiInsightsResult').innerHTML = `
+            <div class="ai-report">
+
+                ${platformInsights.map(insight => `
+                    <div class="ai-platform-report">
+
+                        <div class="ai-report-header">
+                            <div>
+                                <span class="ai-eyebrow">
+                                    ${esc(insight.platform)} ANALYSIS
+                                </span>
+                                <h2>AI Growth Intelligence</h2>
+                                <p>Your personalized growth report</p>
+                            </div>
+
+                            <span class="ai-confidence">
+                                ${esc(insight.confidence || 'Not specified')} Confidence
+                            </span>
+                        </div>
+
+                        <section class="ai-section ai-overview">
+                            <h3>📊 Account Overview</h3>
+                            <p>${esc(insight.overall_assessment)}</p>
+                        </section>
+
+                        <div class="ai-two-column">
+
+                            <section class="ai-section ai-strengths">
+                                <h3>What You're Doing Well</h3>
+                                ${renderList(insight.strengths)}
+                            </section>
+
+                            <section class="ai-section ai-weaknesses">
+                                <h3>What Needs Improvement</h3>
+                                ${renderList(insight.weaknesses)}
+                            </section>
+
+                        </div>
+
+                        <section class="ai-section">
+                            <h3>Hashtags You Should Try</h3>
+                            <p class="ai-description">
+                                Discover hashtags relevant to your content and audience.
+                            </p>
+                            <div class="ai-grid">
+                                ${renderHashtags(insight.hashtag_recommendations)}
+                            </div>
+                        </section>
+
+                        <section class="ai-section">
+                            <h3>Learn From Successful Creators</h3>
+                            <p class="ai-description">
+                                Take inspiration from creators in your industry.
+                            </p>
+                            <div class="ai-grid">
+                                ${renderCreators(insight.creator_inspiration)}
+                            </div>
+                        </section>
+
+                        <section class="ai-section">
+                            <h3>Content Ideas For Your Account</h3>
+                            <div class="ai-grid">
+                                ${renderContentIdeas(insight.content_ideas)}
+                            </div>
+                        </section>
+
+                        <section class="ai-section">
+                            <h3>Recommended Growth Actions</h3>
+                            ${renderGrowthTips(insight.growth_tips)}
+                        </section>
+
+                        <section class="ai-section">
+                            <h3>Your Weekly Action Plan</h3>
+                            <div class="ai-weekly-plan">
+                                ${renderWeeklyPlan(insight.weekly_plan)}
+                            </div>
+                        </section>
+
+                    </div>
+                `).join('')}
+
+            </div>
+        `;
+
+
+        toast('AI growth report generated successfully.');
+
+    } catch (error) {
+        console.error('AI Insights Error:', error);
+        toast(error.message);
+    } finally {
+        button.disabled = false;
+        button.textContent = 'Generate AI Insights';
+    }
+}
+
+
+function renderForecastChart(forecast, metric) {
+    const historical = forecast.historical || [];
+    const predicted = forecast.forecast || [];
+
+    if (historical.length < 2 || !predicted.length) {
+        return `
+            <p class="forecast-unavailable">
+                Not enough historical data to draw this graph.
+            </p>
+        `;
+    }
+
+    const width = 900;
+    const height = 280;
+    const left = 85;
+    const right = 30;
+    const top = 25;
+    const bottom = 45;
+
+    const allValues = [
+        ...historical.map(item => Number(item.value)),
+        ...predicted.map(item => Number(item.predicted_value))
+    ];
+
+    const maxValue = Math.max(...allValues, 1) * 1.15;
+
+    const totalPoints = historical.length + predicted.length;
+    const chartWidth = width - left - right;
+    const chartHeight = height - top - bottom;
+
+    const getPoint = (value, index) => ({
+        x: left + (index / Math.max(totalPoints - 1, 1)) * chartWidth,
+        y: height - bottom - (value / maxValue) * chartHeight
+    });
+
+    const historicalPoints = historical.map((item, index) =>
+        getPoint(Number(item.value), index)
+    );
+
+    const predictedPoints = predicted.map((item, index) =>
+        getPoint(
+            Number(item.predicted_value),
+            historical.length + index
+        )
+    );
+
+    const historicalLine = historicalPoints
+        .map(point => `${point.x},${point.y}`)
+        .join(' ');
+
+    // Include the last historical point to connect both lines.
+    const predictedLine = [
+        historicalPoints[historicalPoints.length - 1],
+        ...predictedPoints
+    ].map(point => `${point.x},${point.y}`).join(' ');
+
+    const format = value => metric === 'average_engagement_rate'
+        ? `${Number(value).toFixed(2)}%`
+        : Number(value).toLocaleString('en-IN', {
+            maximumFractionDigits: 0
+        });
+
+    const dividerX = predictedPoints[0].x;
+
+    return `
+        <div class="forecast-chart">
+            <div class="forecast-legend">
+                <span><i class="history-dot"></i> Historical</span>
+                <span><i class="prediction-dot"></i> Predicted</span>
+            </div>
+
+            <svg viewBox="0 0 ${width} ${height}"
+                 width="100%"
+                 role="img"
+                 aria-label="Historical and predicted ${esc(metric)}">
+
+                ${[0, 1, 2, 3, 4].map(index => {
+                    const y = top + index / 4 * chartHeight;
+                    const value = maxValue * (1 - index / 4);
+
+                    return `
+                        <line x1="${left}" y1="${y}"
+                              x2="${width - right}" y2="${y}"
+                              stroke="#334155"
+                              stroke-dasharray="4 5"/>
+
+                        <text x="${left - 10}" y="${y + 4}"
+                              fill="#94a3b8"
+                              font-size="12"
+                              text-anchor="end">
+                            ${format(value)}
+                        </text>
+                    `;
+                }).join('')}
+
+                <line x1="${dividerX}" y1="${top}"
+                      x2="${dividerX}" y2="${height - bottom}"
+                      stroke="#f59e0b"
+                      stroke-dasharray="5 5"/>
+
+                <polyline points="${historicalLine}"
+                          fill="none"
+                          stroke="#3b82f6"
+                          stroke-width="3"
+                          stroke-linejoin="round"
+                          stroke-linecap="round"/>
+
+                <polyline points="${predictedLine}"
+                          fill="none"
+                          stroke="#22c55e"
+                          stroke-width="3"
+                          stroke-dasharray="8 5"
+                          stroke-linejoin="round"
+                          stroke-linecap="round"/>
+
+                ${historicalPoints.map((point, index) => `
+                    <circle cx="${point.x}" cy="${point.y}" r="4"
+                            fill="#3b82f6">
+                        <title>
+                            ${esc(historical[index].date)}:
+                            ${format(historical[index].value)}
+                        </title>
+                    </circle>
+                `).join('')}
+
+                ${predictedPoints.map((point, index) => `
+                    <circle cx="${point.x}" cy="${point.y}" r="5"
+                            fill="#22c55e">
+                        <title>
+                            Period ${predicted[index].period}:
+                            ${format(predicted[index].predicted_value)}
+                        </title>
+                    </circle>
+                `).join('')}
+
+                <text x="${left}" y="${height - 12}"
+                      fill="#94a3b8" font-size="12">
+                    Historical
+                </text>
+
+                <text x="${width - right}" y="${height - 12}"
+                      fill="#94a3b8" font-size="12"
+                      text-anchor="end">
+                    Forecast
+                </text>
+            </svg>
+        </div>
+    `;
+}
+
+async function generateForecast() {
+    const selectedIds = Array.from(
+        $$('.cross-analysis-checkbox:checked')
+    ).map(checkbox => checkbox.value);
+
+    if (selectedIds.length === 0) {
+        toast('Select at least one saved analysis.');
+        return;
+    }
+
+    const button = $('#generateForecast');
+    const resultContainer = $('#forecastResult');
+
+    try {
+        button.disabled = true;
+        button.textContent = 'Calculating forecast...';
+
+        resultContainer.innerHTML = `
+            <p class="note">Calculating growth forecasts...</p>
+        `;
+
+        const result = await api('/api/forecast', {
+            method: 'POST',
+            body: JSON.stringify({
+                selected_ids: selectedIds
+            })
+        });
+
+        console.log('Forecast Results:', result);
+
+        const metricLabels = {
+            total_views: '👁️ Views',
+            total_interactions: '❤️ Interactions',
+            average_engagement_rate: '📈 Engagement Rate'
+        };
+
+        const formatValue = (value, metric) => {
+            if (metric === 'average_engagement_rate') {
+                return `${Number(value).toFixed(2)}%`;
+            }
+
+            return Number(value).toLocaleString('en-IN', {
+                maximumFractionDigits: 2
+            });
+        };
+
+        const renderMetricForecast = (metric, forecast) => {
+            if (!forecast || forecast.available === false) {
+                return `
+                    <div class="forecast-metric">
+                        <h4>${metricLabels[metric] || esc(metric)}</h4>
+                        <p class="forecast-unavailable">
+                            ${esc(forecast?.reason || 'Forecast unavailable.')}
+                        </p>
+                    </div>
+                `;
+            }
+
+            const trendIcon = {
+                increasing: '📈',
+                decreasing: '📉',
+                stable: '➡️'
+            };
+
+            return `
+                <div class="forecast-metric">
+                    <div class="forecast-metric-header">
+                        <h4>${metricLabels[metric] || esc(metric)}</h4>
+                        <span>${trendIcon[forecast.trend] || '📊'}
+                            ${esc(forecast.trend || 'Unknown')}
+                        </span>
+                    </div>
+
+                    <p class="forecast-meta">
+                        Based on ${esc(forecast.historical_observations)}
+                        historical observations
+                    </p>
+                    ${renderForecastChart(forecast, metric)}
+                    <div class="forecast-values">
+                        ${forecast.forecast.map(item => `
+                            <div class="forecast-value">
+                                <span>Period ${esc(item.period)}</span>
+                                <strong>
+                                    ${formatValue(item.predicted_value, metric)}
+                                </strong>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        };
+
+        const platformHTML = Object.entries(result.platforms || {})
+            .map(([platform, data]) => `
+                <section class="forecast-platform">
+                    <div class="forecast-platform-header">
+                        <h3>📊 ${esc(platform.toUpperCase())}</h3>
+                        <span>
+                            ${esc(data.historical_observations)}
+                            observations
+                        </span>
+                    </div>
+
+                    <div class="forecast-grid">
+                        ${Object.entries(data.forecasts || {})
+                            .map(([metric, forecast]) =>
+                                renderMetricForecast(metric, forecast)
+                            ).join('')}
+                    </div>
+                </section>
+            `).join('');
+
+        const follower = result.follower_forecast || {};
+
+        resultContainer.innerHTML = `
+            <div class="forecast-report">
+
+                <div class="forecast-heading">
+                    <h3>🚀 Growth Forecast Report</h3>
+                    <p>
+                        Predictions based on your saved social media data.
+                    </p>
+                </div>
+
+                ${platformHTML || `
+                    <p class="note">No platform data available for forecasting.</p>
+                `}
+
+                <section class="forecast-follower">
+                    <h3>👥 Follower Growth</h3>
+                    ${follower.available
+                        ? '<p>Follower forecast is available.</p>'
+                        : `<p>${esc(follower.reason || 'Historical follower snapshots are required.')}</p>`
+                    }
+                </section>
+
+                <p class="forecast-disclaimer">
+                    Predictions are estimates based on historical patterns,
+                    not guaranteed future results. Periods represent the next
+                    observations, not necessarily calendar days.
+                </p>
+
+            </div>
+        `;
+
+        toast('Growth forecast generated successfully.');
+
+    } catch (error) {
+        console.error('Forecast Error:', error);
+        resultContainer.innerHTML = `
+            <p class="note">Unable to generate forecast: ${esc(error.message)}</p>
+        `;
+        toast(error.message);
+
+    } finally {
+        button.disabled = false;
+        button.textContent = 'Generate Forecast';
+    }
+}
+
+
+
 // ============================================================
 // SAVE ENTIRE WORKSPACE
 // ============================================================
@@ -1945,6 +2469,11 @@ $('#exportCsvBtn') &&
 $('#saveAllBtn').onclick =
     saveAll;
 
+// Generate AI insights.
+$('#generateAIInsights').onclick = generateAIInsights;
+
+// Generate forecast.
+$('#generateForecast').onclick = generateForecast;
 
 // ============================================================
 // REFRESH BUTTON
