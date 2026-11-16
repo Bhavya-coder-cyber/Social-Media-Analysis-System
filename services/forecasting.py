@@ -2,7 +2,22 @@ from collections import defaultdict
 from datetime import datetime
 import numpy as np
 from sklearn.linear_model import LinearRegression
-from sklearn.metrics import mean_absolute_error
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.metrics import mean_absolute_error, mean_squared_error
+from sklearn.ensemble import GradientBoostingRegressor
+from xgboost import XGBRegressor
+
+def create_lag_features(values, lookback=3):
+    X = []
+    y = []
+
+    for i in range(lookback, len(values)):
+        X.append(values[i-lookback:i])
+        y.append(values[i])
+
+    return np.array(X), np.array(y)
+
+
 
 def prepare_historical_data(historical_data):
 
@@ -58,28 +73,126 @@ def prepare_historical_data(historical_data):
 
     return result
 
+# def forecast_metric(daily_data, metric, periods=7):
+#     if len(daily_data) < 3:
+#         raise ValueError("Not enough data points to perform forecasting")
+#     if metric not in daily_data[0]:
+#         raise ValueError(f"Invalid metric: {metric}")
+
+#     values = np.array([
+#         float(items[metric])
+#         for items in daily_data
+#     ])
+
+#     X = np.arange(len(values)).reshape(-1, 1)
+#     y = values
+
+#     model = LinearRegression()
+#     model.fit(X, y)
+
+#     future_X = np.arange(len(values), len(values) + periods).reshape(-1, 1)
+
+#     future_predictions = model.predict(future_X)
+#     future_predictions = np.maximum(future_predictions, 0)
+#     slope = model.coef_[0]
+#     if slope > 0:
+#         trend = "increasing"
+#     elif slope < 0:
+#         trend = "decreasing"
+#     else:
+#         trend = "stable"
+
+#     return {
+#         "metric": metric,
+#         "historical_observations": len(values),
+#         "trend": trend,
+#         "slope": round(float(slope), 2),
+#         "forecast": [
+#             {
+#                 "period": i + 1,
+#                 "predicted_value": round(float(value), 2)
+#             }
+#             for i, value in enumerate(future_predictions)
+#         ]
+#     }
+
 def forecast_metric(daily_data, metric, periods=7):
-    if len(daily_data) < 3:
-        raise ValueError("Not enough data points to perform forecasting")
+
+    # if len(daily_data) < 4:
+    #     raise ValueError(
+    #         "Not enough data points to perform forecasting"
+    #     )
+    
+    if len(daily_data) < 10:
+        raise ValueError(
+            "Not enough data points to perform forecasting. "
+            "At least 10 data points are required."
+        )
+
     if metric not in daily_data[0]:
         raise ValueError(f"Invalid metric: {metric}")
 
     values = np.array([
-        float(items[metric])
-        for items in daily_data
+        float(item[metric])
+        for item in daily_data
     ])
 
-    X = np.arange(len(values)).reshape(-1, 1)
-    y = values
+    lookback = 3
 
-    model = LinearRegression()
+    X, y = create_lag_features(values, lookback)
+
+    # model = RandomForestRegressor(
+    #     n_estimators=200,
+    #     max_depth=5,
+    #     min_samples_split=2,
+    #     min_samples_leaf=2,
+    #     max_features=1.0,
+    #     random_state=42,
+    #     n_jobs=-1
+    # )
+
+    # model = GradientBoostingRegressor(
+    #     n_estimators=100,
+    #     learning_rate=0.05,
+    #     max_depth=2,
+    #     min_samples_split=2,
+    #     min_samples_leaf=2,
+    #     random_state=42
+    # )
+
+    model = XGBRegressor(
+        n_estimators=100,
+        learning_rate=0.05,
+        max_depth=3,
+        min_child_weight=2,
+        subsample=0.8,
+        colsample_bytree=0.8,
+        objective="reg:squarederror",
+        random_state=42,
+        n_jobs=-1
+    )
+
     model.fit(X, y)
 
-    future_X = np.arange(len(values), len(values) + periods).reshape(-1, 1)
+    history = list(values)
+    future_predictions = []
 
-    future_predictions = model.predict(future_X)
-    future_predictions = np.maximum(future_predictions, 0)
-    slope = model.coef_[0]
+    for _ in range(periods):
+
+        features = np.array(
+            history[-lookback:]
+        ).reshape(1, -1)
+
+        prediction = model.predict(features)[0]
+        prediction = max(float(prediction), 0)
+
+        future_predictions.append(prediction)
+        history.append(prediction)
+
+    slope = (
+        future_predictions[-1] - future_predictions[0]
+    ) / max(periods - 1, 1)
+
     if slope > 0:
         trend = "increasing"
     elif slope < 0:
@@ -95,7 +208,7 @@ def forecast_metric(daily_data, metric, periods=7):
         "forecast": [
             {
                 "period": i + 1,
-                "predicted_value": round(float(value), 2)
+                "predicted_value": round(value, 2)
             }
             for i, value in enumerate(future_predictions)
         ]
@@ -117,19 +230,84 @@ def evaluate_forecast(actual_values, predicted_values):
         predicted_values
     )
 
+    rsme = np.sqrt(
+        mean_squared_error(
+            actual_values,
+            predicted_values
+        )
+    )
+
     return {
         "mae": round(float(mae), 2),
+        "rmse": round(float(rsme), 2),
         "observations": len(actual_values)
     }
 
 #Creating evaluate_model function to evaluate the model's performance on a test set of 80/20 split of the data. The function takes in the daily_data, metrics to evaluate, and test_ratio (default is 0.2 for 80/20 split). It returns a dictionary containing the evaluation results for each metric.
+# def evaluate_model(daily_data, metric, test_ratio=0.2):
+#     sorted_data = sorted(
+#         daily_data,
+#         key=lambda item: item["date"]
+#     )
+#     if len(sorted_data) < 5:
+#         raise ValueError("Not enough data points to evaluate the model.")
+#     platforms = {
+#         item.get("platform")
+#         for item in sorted_data
+#         if item.get("platform")
+#     }
+
+#     if len(platforms) > 1:
+#         raise ValueError(
+#             "Evaluation is only supported for a single platform."
+#         )
+
+#     if not 0 < test_ratio < 1:
+#         raise ValueError("Test ratio must be between 0 and 1.")
+
+#     values = np.array([
+#         float(item[metric])
+#         for item in sorted_data
+#     ])
+#     X = np.arange(len(values)).reshape(-1, 1)
+
+#     split_index = int(len(values) * (1 - test_ratio))
+#     split_index = max(3, min(split_index, len(values) - 1))
+
+#     X_train, X_test = X[:split_index], X[split_index:]
+#     y_train, y_test = values[:split_index], values[split_index:]
+
+#     model = LinearRegression()
+#     model.fit(X_train, y_train)
+
+#     predictions = np.maximum(
+#         model.predict(X_test), 0
+#     )
+#     mae = mean_absolute_error(y_test, predictions)
+#     rmse = np.sqrt(mean_squared_error(y_test, predictions))
+
+#     return {
+#         "metric": metric,
+#         "training_observations": len(y_train),
+#         "testing_observations": len(y_test),
+#         "mae": round(float(mae), 2),
+#         "rmse": round(float(rmse), 2),
+#         "actual": y_test.tolist(),
+#         "predicted": predictions.round(2).tolist()
+#     }
+
 def evaluate_model(daily_data, metric, test_ratio=0.2):
+
     sorted_data = sorted(
         daily_data,
         key=lambda item: item["date"]
     )
+
     if len(sorted_data) < 5:
-        raise ValueError("Not enough data points to evaluate the model.")
+        raise ValueError(
+            "Not enough data points to evaluate the model."
+        )
+
     platforms = {
         item.get("platform")
         for item in sorted_data
@@ -148,29 +326,88 @@ def evaluate_model(daily_data, metric, test_ratio=0.2):
         float(item[metric])
         for item in sorted_data
     ])
-    X = np.arange(len(values)).reshape(-1, 1)
+
+    lookback = 3
+
+    X, y = create_lag_features(values, lookback)
 
     split_index = int(len(values) * (1 - test_ratio))
-    split_index = max(3, min(split_index, len(values) - 1))
+    split_index = max(lookback + 1, min(
+        split_index, len(values) - 1
+    ))
 
-    X_train, X_test = X[:split_index], X[split_index:]
-    y_train, y_test = values[:split_index], values[split_index:]
+    train_end = split_index - lookback
 
-    model = LinearRegression()
+    X_train = X[:train_end]
+    y_train = y[:train_end]
+
+    actual = []
+    predictions = []
+
+    # model = RandomForestRegressor(
+    #     n_estimators=200,
+    #     max_depth=5,
+    #     min_samples_split=2,
+    #     min_samples_leaf=2,
+    #     max_features=1.0,
+    #     random_state=42,
+    #     n_jobs=-1
+    # )
+
+    # model = GradientBoostingRegressor(
+    #     n_estimators=100,
+    #     learning_rate=0.05,
+    #     max_depth=2,
+    #     min_samples_split=2,
+    #     min_samples_leaf=2,
+    #     random_state=42
+    # )
+
+    model = XGBRegressor(
+        n_estimators=100,
+        learning_rate=0.05,
+        max_depth=3,
+        min_child_weight=2,
+        subsample=0.8,
+        colsample_bytree=0.8,
+        objective="reg:squarederror",
+        random_state=42,
+        n_jobs=-1
+    )
+
     model.fit(X_train, y_train)
 
-    predictions = np.maximum(
-        model.predict(X_test), 0
-    )
-    mae = mean_absolute_error(y_test, predictions)
+    history = list(values[:split_index])
 
+    for i in range(split_index, len(values)):
+
+        features = np.array(
+            history[-lookback:]
+        ).reshape(1, -1)
+
+        prediction = model.predict(features)[0]
+        prediction = max(float(prediction), 0)
+
+        predictions.append(prediction)
+        actual.append(values[i])
+
+        # Walk-forward evaluation:
+        # use the actual observation for the next prediction.
+        history.append(values[i])
+
+    mae = mean_absolute_error(actual, predictions)
+    rmse = np.sqrt(
+        mean_squared_error(actual, predictions)
+    )
+    
     return {
         "metric": metric,
         "training_observations": len(y_train),
-        "testing_observations": len(y_test),
+        "testing_observations": len(actual),
         "mae": round(float(mae), 2),
-        "actual": y_test.tolist(),
-        "predicted": predictions.round(2).tolist()
+        "rmse": round(float(rmse), 2),
+        "actual": np.array(actual).tolist(),
+        "predicted": np.round(predictions, 2).tolist()
     }
 
 def forecast_all_metrics(historical_data, periods=7):

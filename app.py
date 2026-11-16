@@ -373,6 +373,9 @@ def forecast_api():
                         metric=metric,
                         periods=7
                     )
+                    evaluation_result = evaluate_model(daily_data, metric)
+
+                    forecast_result["evaluation"] = evaluation_result
 
                     forecast_result["historical"] = [
                         {
@@ -402,7 +405,7 @@ def forecast_api():
             "follower_forecast": {
                 "available": False,
                 "reason": "Historical follower snapshots are required."
-            }
+            },
         })
 
     except Exception as error:
